@@ -1,0 +1,118 @@
+import 'dart:async';
+
+import 'graph.dart';
+import 'parser.dart.txt';
+
+class SearchIndex {
+  // this gives you a cursor you can listen to. It may be empty initially
+  // then change to give you the result you want. Needs a delta strategy
+  // for animated list view.
+  // if listener is not provided then return static cursor.
+  // the await will return right away if you provided onChanged otherwise
+  // it will wait until the seach completes.
+  Future<SearchCursor> query({
+    required String query,
+    int limit = 0,
+    Function()? onChanged,
+  }) async {
+    final q = Query.parse(query);
+
+    final a = SearchCursor(this, q, limit, onChanged);
+    return a.startReading();
+  }
+}
+
+// readers represent snapshot of the index.
+class Reader {
+  static Reader? open(String url) {
+    return null;
+  }
+}
+
+// what would a chunk iterator look like? A positionable, scrollable iterator?
+// can it be a change notifier? the reader for bluge is a snapshot, so
+// in this case we would be  listening to whatever
+// bluge and tantivy both don't return the fast fields, should they?
+//
+
+// we might want to parameterize these cursors, they might return
+// various fields?
+class ExecuteQuery {
+  int dirty = 0;
+  final ExecuteQuery? parent;
+  Query query;
+  Function() calc;
+
+  ExecuteQuery(this.query, this.parent, this.calc);
+}
+
+class SearchCursor {
+  SearchIndex index;
+  Query query;
+  Function()? listener;
+  int length = 0;
+  int limit = 0;
+
+  List<List<ExecuteQuery?>> layers = [];
+  List<ExecuteQuery> leaves = [];
+  Completer<SearchCursor> completer = Completer<SearchCursor>();
+
+  SearchCursor(this.index, this.query, this.limit, this.listener) {}
+
+  Future<SearchCursor> startReading() async {
+    // first reverse the query nodes so they point to their parents
+    // schedule the leaves, then start executing
+    //visit(query);
+    // start executing the leaves, wait until they are done.
+    for (var o in leaves) {
+      exec(o);
+    }
+    return completer.future;
+  }
+
+  exec(ExecuteQuery query) async {
+    // execute the node
+    await query.calc();
+
+    // notify parent
+    if (query.parent != null) {
+      query.parent!.dirty--;
+      if (query.parent!.dirty == 0) {
+        exec(query.parent!);
+      }
+    } else {
+      completer.complete(this);
+    }
+  }
+
+  // visit(Query q) {
+  //   if (q.query.isEmpty) {
+  //     leaves.add(q);
+  //     return;
+  //   }
+  //   for (var o in q.query) {
+  //     q.dirty = q.query.length;
+  //     o.parent = q;
+  //     visit(o);
+  //   }
+  // }
+
+  SearchResult operator [](int index) {
+    return SearchResult();
+  }
+
+  // delta is going to give you a delta from previous time calling delta (there is only one listener allowed)
+  ListDelta get delta {
+    return ListDelta([], []);
+  }
+}
+
+class ListDelta {
+  List<int> inserted;
+  List<int> removed;
+  ListDelta(this.inserted, this.removed);
+}
+
+class SearchResult {
+  List<dynamic> value = [];
+}

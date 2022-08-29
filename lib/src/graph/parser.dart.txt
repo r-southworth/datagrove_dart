@@ -1,0 +1,296 @@
+
+
+
+
+// can or have parentheses too?
+
+import 'lexer.dart';
+enum Op { or, and, add, subtract, search, phrase, positionQuery, term }
+enum Precedence {
+  none,
+  or,
+  and,
+  equality,
+  comparison,
+  term,
+  factor,
+  unary,
+  call,
+  primary
+}
+
+enum StackOp {
+  and,
+  or
+
+}
+
+class ParseRule {
+  Function(Parser)? fn;
+  Function(Parser)? bin;
+  Precedence prec;
+  ParseRule(this.fn,this.bin,this.prec);
+}
+var rules = <TokenType,ParseRule>{
+  TokenType.lparen: ParseRule(grouping, null, Precedence.none),
+  TokenType.rparen: ParseRule(grouping, null, Precedence.none)
+};
+
+/*
+ParseRule rules = {
+  [TOKEN_LEFT_PAREN]    = {grouping, NULL,   PREC_NONE},
+  [TOKEN_RIGHT_PAREN]   = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_LEFT_BRACE]    = {NULL,     NULL,   PREC_NONE}, 
+  [TOKEN_RIGHT_BRACE]   = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_COMMA]         = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_DOT]           = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_MINUS]         = {unary,    binary, PREC_TERM},
+  [TOKEN_PLUS]          = {NULL,     binary, PREC_TERM},
+  [TOKEN_SEMICOLON]     = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_SLASH]         = {NULL,     binary, PREC_FACTOR},
+  [TOKEN_STAR]          = {NULL,     binary, PREC_FACTOR},
+  [TOKEN_BANG]          = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_BANG_EQUAL]    = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_EQUAL]         = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_EQUAL_EQUAL]   = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_GREATER]       = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_GREATER_EQUAL] = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_LESS]          = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_LESS_EQUAL]    = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_IDENTIFIER]    = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_STRING]        = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_NUMBER]        = {number,   NULL,   PREC_NONE},
+  [TOKEN_AND]           = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_CLASS]         = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_ELSE]          = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_FALSE]         = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_FOR]           = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_FUN]           = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_IF]            = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_NIL]           = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_OR]            = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_PRINT]         = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_RETURN]        = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_SUPER]         = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_THIS]          = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_TRUE]          = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_VAR]           = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_WHILE]         = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_ERROR]         = {NULL,     NULL,   PREC_NONE},
+  [TOKEN_EOF]           = {NULL,     NULL,   PREC_NONE},
+};
+*/
+number(Parser parser ){
+  var value = num.parse(parser.previous.symbol);
+  //parser.emitConstant(value);
+}
+grouping(Parser parser) {
+  parser.expression();
+  parser.consume(TokenType.rparen, "expected )");
+}
+unary(Parser parser) {
+  var ot = parser.previous.type;
+  parser.expression();
+  // emit something for negate.
+}
+
+void binary(Parser parser) {
+  TokenType operatorType = parser.previous.type;
+  ParseRule rule = parser.getRule(operatorType);
+  parser.parsePrecedence(TokenType.values[operatorType] + 1);
+
+  switch (operatorType) {
+    case TokenType.and:       parser.emit(StackOp.and); break;
+    default: return; // Unreachable.
+  }
+}
+final noisewords = {"and"};
+
+const stop = {
+  "a",
+  "an",
+  "and",
+  "are",
+  "as",
+  "at",
+  "be",
+  "but",
+  "by",
+  "for",
+  "if",
+  "in",
+  "into",
+  "is",
+  "it",
+  "no",
+  "not",
+  "of",
+  "on",
+  "or",
+  "such",
+  "that",
+  "the",
+  "their",
+  "then",
+  "there",
+  "these",
+  "they",
+  "this",
+  "to",
+  "was",
+  "will",
+  "with"
+};
+
+
+class Term {
+  String field; // could expand the query to all fields?
+  String term;
+  // we need to have some extra bits on here for fast field flags to return?
+  int flags = 0;
+  Term(this.field, this.term);
+}
+
+class Parser {
+  Lexer lexer;
+  Token previous = Token.eof;
+  Token current = Token.eof;
+  String error="";
+
+  // need a stack?
+  List<Token> args = [];
+
+  emit(StackOp o) {
+
+  }
+
+  ParseRule getRule(TokenType t) {
+    var a =  rules[t];
+    if (a==null) {
+      throw "bad token type";
+    }
+    return a;
+  }
+  Parser(this.lexer) {
+    advance();
+    expression();
+  }
+
+  bool get ok {
+    return error.isEmpty && lexer.error.isEmpty;
+  }
+
+  
+
+  void parsePrecedence(Precedence precedence) {
+
+  advance();
+  var prefixRule = getRule(previous.type).prefix;
+  if (prefixRule == NULL) {
+    error("Expect expression.");
+    return;
+  }
+
+  prefixRule();
+}
+
+  advance() {
+    previous = current;
+    current = lexer.next();
+  }
+  consume(TokenType t, String error){
+
+  }
+  expression() {
+
+  }
+  grouping() {
+    expression();
+    consume(TokenType.rparen, "Expect ) as expression");
+  }
+
+  Query matchTerm() {
+    return Query(Op.term, [], lexer.token.symbol);
+  }
+  Query matchAnd() {
+    bool negate = false;
+    // ends with or or end of query.
+    List<Query> q = [];
+    String keyword = "";
+    while (!lexer.match(TokenType.eof) && !lexer.match(TokenType.or)) {
+      if (lexer.match(TokenType.lparen)) {
+        q.add(matchOr());
+        lexer.next(); // take rparen
+      }
+
+      if (lexer.match(TokenType.hyphen)) {
+        negate = true;
+        lexer.next();
+      }
+      if (lexer.token.type == TokenType.keyword){
+        keyword = 
+      }
+      var o = matchRange();
+
+      q.add(Query(negate ? Op.subtract : Op.add, [o], null));
+    }
+    return Query(Op.and, q, null);
+  }
+
+  // ends with a rparen or end of source.
+  Query matchOr() {
+    List<Query> q = [];
+    q.add(matchAnd());
+    while (lexer.match(TokenType.or)) {
+      q.add(matchAnd());
+    }
+    if (q.length > 1) {
+      return Query(Op.or, q, null);
+    } else {
+      return q[0];
+    }
+  }
+}
+
+
+
+// Phrase queries are are more general than just x y z because of around and
+
+class PhraseSearch {
+  int within = 0; // 0 means sequential
+  List<Term> terms = [];
+}
+
+
+
+// we can turn times, prices into ranges to get some fuzz? is this helpful or not?
+// probably not helpful. make them do it.
+class RangeSearch {
+  //Term start, end;
+}
+
+class Search {}
+
+class Phrase {
+  Phrase(String s) {
+    List<Query> words = [];
+    while (lexer.token != null && lexer.token!.symbol == "\"") {
+      final term = Term(field, lexer.token!.symbol);
+      final q = Query(Op.term, [], term);
+      words.add(q);
+    }
+    return Query(Op.phrase, words, null);
+  }
+}
+
+class Query {
+  Op op;
+  List<Query> query;
+  dynamic params;
+
+  Query(this.op, this.query, this.params);
+
+
+  // parsing inside of quotes, limited syntax processing, should be just words
+
+}

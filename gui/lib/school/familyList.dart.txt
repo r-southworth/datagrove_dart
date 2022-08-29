@@ -1,0 +1,135 @@
+import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'app.dart';
+
+class FamilySearch extends StatefulWidget {
+  @override
+  State<FamilySearch> createState() => _FamilySearchState();
+}
+
+class _FamilySearchState extends State<FamilySearch> {
+  final c = TextEditingController();
+
+  // we need a list of families here for the paginator,
+  List<Student> family = client.family.data;
+
+  @override
+  void initState() {
+    super.initState();
+    c.addListener(() {
+      _filter();
+    });
+  }
+
+  _filter() {
+    var txt = c.text.toLowerCase();
+    if (txt.isEmpty) {
+      setState(() {
+        family = client.family.data;
+      });
+    } else {
+      // filter according to txt
+      // use contains?
+      setState(() {
+        family = client.family.data.where((f) {
+          return f.lastName.toLowerCase().startsWith(txt);
+        }).toList();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // as a media query we should be able to switch this to list tiles
+
+    Widget buildGrid() {
+      final col = <DataColumn>[
+        DataColumn(label: Container()), //Text("")),
+        DataColumn(label: Container()),
+        DataColumn(label: Container()),
+        DataColumn(label: Container()),
+        DataColumn(label: Container())
+      ];
+
+      DataRow row(Family f) {
+        Widget tapForHistory(Widget w) {
+          return GestureDetector(
+              onTap: () {
+                LogScreen.show(context, f);
+              },
+              child: w);
+        }
+
+        return DataRow(cells: [
+          DataCell(tapForHistory(f.statusAsEmoji)),
+          DataCell(tapForHistory(Text("${f.firstName} ${f.lastName}"))),
+          // for email we want to link to the letter composer
+          DataCell(tapForHistory(Text(f.email))),
+          // for phone we can also go to the letter composer, but for sms.
+          //
+          DataCell(tapForHistory(Text(f.phone))),
+          DataCell(tapForHistory(Text(f.district)))
+        ]);
+      }
+
+      return SliverToBoxAdapter(
+          child: Theme(
+              data: ThemeData.dark(),
+              child: PaginatedDataTable(
+                  rowsPerPage: 50,
+                  columns: col,
+                  headingRowHeight: 0,
+                  source: Data2<Family>(family, row))));
+    }
+
+    final r = SingleScaffold(
+        back: false,
+        title: '$girl ${client.title}',
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // maybe show new in place of + if we are in import mode
+            CupertinoButton(
+                onPressed: () => AddLogEntry.show(context),
+                child: Icon(CupertinoIcons.plus_circle)),
+            CupertinoButton(
+                onPressed: () {
+                  SettingsDialog.show(context);
+                }, // AddLogEntry1.show(context, widget.family),
+                child: Icon(CupertinoIcons.ellipsis_vertical))
+          ],
+        ),
+        children: [
+          // we want a search bar and a datatable
+          Search(c),
+
+          SliverList(
+              delegate:
+                  SliverChildBuilderDelegate((BuildContext context, int index) {
+            var f = family[index];
+            return CupertinoListTile(
+                onTap: () => LogScreen.show(context, f),
+                leading: f.statusAsEmoji,
+                title: Text(family[index].firstLast),
+                subtitle: Text(f.district));
+          }, childCount: family.length))
+        ]);
+    return r;
+  }
+}
+
+
+/*
+Row(mainAxisSize: MainAxisSize.min, children: [
+          CupertinoButton(
+              onPressed: () {
+                setState(() {
+                  showFamily = !showFamily;
+                });
+              },
+              child: Icon(showFamily
+                  ? CupertinoIcons.list_dash
+                  : CupertinoIcons.person)),
+          ,
+        ])*/

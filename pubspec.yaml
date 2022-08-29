@@ -1,0 +1,24 @@
+name: search
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+# homepage: https://www.example.com
+
+environment:
+  sdk: '>=2.17.6 <3.0.0'
+
+# dependencies:
+#   path: ^1.8.0
+
+dev_dependencies:
+  lints: ^2.0.0
+  shelf: ^1.3.2
+  shelf_cors_headers: ^0.1.3
+  shelf_hotreload: ^1.3.0
+  shelf_multipart: ^1.0.0
+  shelf_plus: ^1.4.0
+  shelf_proxy: ^1.0.2
+  shelf_router: ^1.1.3
+  shelf_static: ^1.1.1
+  shelf_web_socket: ^1.0.2
+  test: ^1.16.0
+dependencies: {cbor: ^5.1.0, cryptography: ^2.0.5, csv: ^5.0.1, ecdsa: ^0.0.4, equatable: ^2.0.5, stemmer: ^2.2.0, tuple: ^2.0.0}

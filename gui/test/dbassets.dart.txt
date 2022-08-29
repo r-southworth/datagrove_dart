@@ -1,0 +1,111 @@
+part of 'pawpaw_db.dart';
+
+class FamilyData {
+  Database db;
+  FamilyData(this.db);
+}
+
+/*
+class PluginData {
+  Database db;
+  PluginData(this.db);
+  DistrictSet? district_;
+
+  Future<DistrictSet> get districts async {
+    if (district_ != null) {
+      return district_!;
+    }
+    final r = DistrictSet([], {});
+    var rs = db.select("select value from district");
+    for (final o in rs.rows) {
+      r.district.add(District.fromJson(jsonDecode(o[0] as String)));
+    }
+    rs = db.select("select key,value from admin");
+    for (final o in rs.rows) {
+      r.admin[o[0] as int] = Administrator.fromJson(jsonDecode(o[1] as String));
+    }
+    return r;
+  }
+
+  Future<GradeSet> gradeSet(int grade) async {
+    var rs = db.select("select gradeset from gradeset where grade=? ", [grade]);
+    for (final o in rs.rows) {
+      return GradeSet.fromJson(jsonDecode(o[0] as String));
+    }
+    return GradeSet();
+  }
+}
+
+class SubjectData {
+  Database db;
+  late PreparedStatement stmt;
+  Map<String, Subject> subject = {};
+  SubjectData(this.db) {
+    stmt = db.prepare('select value from subject where key=?');
+  }
+
+  Future<Subject> loadSubject(String id) async {
+    var r = Subject();
+    var rs = stmt.select([id]);
+    for (final o in rs) {
+      r = Subject.fromJson(jsonDecode(o['value']));
+      return r;
+    }
+    r.id = id;
+    return r;
+  }
+}
+
+
+// this needs to take a file system too?
+// or just look at kIsWeb for that?
+class PluginLoader {
+  Map<String, PluginData> plugin = {};
+  // is there a point to loading multiple languages?
+  // wouldn't there always be a user language?
+  Map<String, SubjectData> subject = {};
+
+  String local;
+  String url;
+  PluginLoader(this.local, this.url);
+
+  Future<Database?> loadDb(String path) async {
+    if (!await File(path).exists()) {
+      return null;
+    }
+    try {
+      final db = sqlite3.open(path);
+      return db;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<Subject> loadSubject(String lang, String id) async {
+    var r = Subject();
+    var o = subject[lang];
+    if (o == null) {
+      var db = await loadDb("$local/$lang.ppp");
+      if (db == null) {
+        return r;
+      }
+      o = SubjectData(db);
+      subject[lang];
+    }
+    return o.loadSubject(id);
+  }
+
+  Future<PluginData?> loadPlugin(String jurisdiction) async {
+    var o = plugin[jurisdiction];
+    if (o != null) {
+      return o;
+    }
+    var db = await loadDb("$local/$jurisdiction.ppp");
+    if (db == null) {
+      return null;
+    }
+    o = PluginData(db);
+    plugin[jurisdiction] = o;
+    return o;
+  }
+}

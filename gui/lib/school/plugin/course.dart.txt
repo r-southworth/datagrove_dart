@@ -1,0 +1,113 @@
+import 'package:admin1/shared/widget.dart';
+import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import '../data/data.dart';
+import '../app/client.dart';
+
+// a Course Editor is complicated! ultimately this needs to be a k-12 planner
+// because so many subjects are legislated that way.
+// for now abstract this as returning a short description? or nothing? signature?
+// for mvp these are all custom anyway.
+
+class CourseEditor extends StatefulWidget {
+  CourseEditor(this.course, this.family, this.student);
+  Family family;
+  Student student;
+  List<Syllabus> course = [];
+
+  static show(BuildContext context, Family f, Student s) async {
+    final v = 0;
+    List<Syllabus> course = await client.assets.courses(f.jurisdiction);
+    Navigator.of(context).push(CupertinoPageRoute(builder: (BuildContext c) {
+      return CourseEditor(course, f, s);
+    }));
+  }
+
+  // static show(
+  //     BuildContext context, List<Course> course, Family f, Student s) async {
+  //   await showCupertinoModalBottomSheet(
+  //       context: context, builder: (context) => CourseEditor(course, f, s));
+  // }
+
+  @override
+  State<CourseEditor> createState() => _CourseEditorState();
+}
+
+class _CourseEditorState extends State<CourseEditor> {
+  final tc = TextEditingController();
+  var courses = List<Syllabus>.empty();
+  var selected = <String>{};
+  @override
+  void initState() {
+    super.initState();
+    tc.addListener(_update);
+    _update();
+  }
+
+  _update() {
+    var txt = tc.text;
+    courses = widget.course.where((e) => e.title.startsWith(txt)).toList();
+  }
+
+  _add(Syllabus o) {
+    setState(() {
+      selected.add(o.title);
+    });
+  }
+
+  _remove(String s) {
+    setState(() {
+      selected.remove(s);
+    });
+  }
+
+  List<Widget> flatSelect() {
+    List<Widget> r = [];
+    for (final o in selected) {
+      r.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Chip(label: Text(o)),
+      ));
+    }
+    return r;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var dv = Column(children: [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CupertinoSearchTextField(
+          controller: tc,
+        ),
+      ),
+      Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Material(
+            color: Colors.transparent,
+            child: SizedBox(
+                height: 32,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: flatSelect(),
+                )),
+          )),
+      Expanded(
+          child: SingleChildScrollView(
+              child: Column(children: [
+        for (final o in courses)
+          CupertinoListTile(
+              title: Text(o.title),
+              trailing: CupertinoButton(
+                  onPressed: () {}, child: Icon(CupertinoIcons.link)),
+              onTap: () {
+                _add(o);
+              })
+      ])))
+    ]);
+    return SingleScaffold2(
+        title: widget.student.firstLast, child: SafeArea(child: dv));
+  }
+}
