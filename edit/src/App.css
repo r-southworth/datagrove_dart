@@ -48,3 +48,27 @@ body {
   color: white;
   padding: 4px;
 }
+
+.appFooter {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+
+  z-index: 5;
+  background-color: black;
+  color: white;
+  padding: 4px;
+  
+}
+.chatEditor {
+  width: 100%;
+  margin: 2;
+  padding: 0;
+
+}
+.chatEditor > div {
+  height: 100%;
+  width: 100%;
+  overflow: scroll;
+}

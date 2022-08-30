@@ -51,7 +51,7 @@ void server() async {
         .addHandler(app);
 
     // Starts the server, in 'localhost' and with port 8080.
-    var server = await shelf_io.serve(handler, 'localhost', 8080);
+    var server = await shelf_io.serve(handler, 'localhost', 8042);
     server.autoCompress = true;
     print('Serving at http://${server.address.host}:${server.port}');
   } catch (e) {

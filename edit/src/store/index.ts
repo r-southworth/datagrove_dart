@@ -47,7 +47,7 @@ class AppState {
 }
 export const store = new AppState();
 
-
+// this is feeding markdown directly as a download, so from flutter all we need to do is trigger it. separately we might want a way to extract it.
 function downloadString(filename: string, text: string) {
   var element = document.createElement('a');
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
