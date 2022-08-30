@@ -1,4 +1,4 @@
-import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'app.dart';
@@ -108,7 +108,7 @@ class _FamilySearchState extends State<FamilySearch> {
               delegate:
                   SliverChildBuilderDelegate((BuildContext context, int index) {
             var f = family[index];
-            return CupertinoListTile(
+            return lt.CupertinoListTile(
                 onTap: () => LogScreen.show(context, f),
                 leading: f.statusAsEmoji,
                 title: Text(family[index].firstLast),

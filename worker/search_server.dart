@@ -15,6 +15,14 @@ void _log(String msg, bool isError) {
 }
 
 void main() async {
+  var dir = Directory("gui/assets/root/school/public");
+  final List<FileSystemEntity> entities = await dir.list().toList();
+  print(entities);
+}
+
+// each message will come as javascript or cbor.
+
+void server() async {
   try {
     int count = 1;
     var handlerSocket = webSocketHandler((webSocket) {

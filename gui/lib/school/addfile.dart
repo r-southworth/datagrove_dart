@@ -1,6 +1,6 @@
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -87,7 +87,7 @@ class _ImportState extends State<Import> {
                 child: SingleChildScrollView(
                     child: Column(children: [
               for (final o in student)
-                CupertinoListTile(
+                lt.CupertinoListTile(
                     title: Text(o.firstLast),
                     trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                       CupertinoButton(

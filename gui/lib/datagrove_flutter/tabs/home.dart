@@ -1,9 +1,9 @@
 // display a view, maybe editable
 import 'dart:typed_data';
 
-import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
 import 'package:flutter/cupertino.dart';
-import 'package:universal_html/html.dart';
+import 'package:universal_html/html.dart' hide Text;
 import '../client/datagrove_flutter.dart';
 import '../ui/menu.dart';
 import 'package:provider/provider.dart';
@@ -38,34 +38,6 @@ class _HomeTabState extends State<HomeTab> {
     controller.range(context.read<Dgf>());
   }
 
-  Widget build2(BuildContext context) {
-    final fileMenu = [
-      Cmd(id: "share", label: "Share"),
-    ];
-    // this would be cheaper as a global?
-    FileStyle style = Dgf.of(context).fileStyle;
-    return RangeBuilder<DirectoryEntry>(
-        controller: controller,
-        // this is the builder for RangeBuilder's animated list.
-        builder: (c, DirectoryEntry d) {
-          return CupertinoListTile(
-            leading: style.folder,
-            trailing: CupertinoButton(
-              child: Icon(CupertinoIcons.ellipsis),
-              onPressed: () {},
-            ),
-            title: Text(d.name ?? "untitled"),
-            //subtitle: Text("${d.size??0} bytes"),
-            onTap: () {
-              if (fileMenu != null) {
-                showCmd(context, fileMenu!);
-              }
-            },
-            onLongPress: () {},
-          );
-        });
-  }
-
   // when the search bar or magnifying clicked we should route to the search
   // page with relevant arguments. How do we feel about the hidden search of apple?
   // the slide up/fade effect is nice instead of a full route slide
@@ -87,6 +59,11 @@ class _HomeTabState extends State<HomeTab> {
             //     Uri.parse("file://${d.localFileServer.localRoot}"));
           })
     ];
+    final fileMenu = [
+      Cmd(id: "share", label: "Share"),
+    ];
+    // this would be cheaper as a global?
+    FileStyle style = Dgf.of(context).fileStyle;
 
     return PageScaffold(
         leading: Container(),
@@ -112,96 +89,27 @@ class _HomeTabState extends State<HomeTab> {
           }
         },
         search: "",
-        slivers: [build2(context)]);
+        slivers: [
+          RangeBuilder<DirectoryEntry>(
+              controller: controller,
+              // this is the builder for RangeBuilder's animated list.
+              builder: (c, DirectoryEntry d) {
+                return lt.CupertinoListTile(
+                  leading: style.folder,
+                  trailing: CupertinoButton(
+                    child: Icon(CupertinoIcons.ellipsis),
+                    onPressed: () {},
+                  ),
+                  title: Text(d.name ?? "untitled"),
+                  //subtitle: Text("${d.size??0} bytes"),
+                  onTap: () {
+                    if (fileMenu != null) {
+                      showCmd(context, fileMenu);
+                    }
+                  },
+                  onLongPress: () {},
+                );
+              })
+        ]);
   }
 }
-
-/*
- HeadingSliver("📌 Pin", first: true),
-        _title("🕒 Featured"),
-        _list(),
-        _title("🏘️ More"),
-        _list(),
-*/
-
-// these tabs must be able to get their trees from the user's app controller
-// maybe with a delegate? maybe force their controller to extend one we know?
-const friend = "🤝";
-
-Widget HeadingSliver(String s, {bool first = false}) {
-  return SliverToBoxAdapter(
-      child: Padding(
-    padding: EdgeInsets.only(left: 8.0, top: first ? 0 : 20, bottom: 8),
-    child: Text(s, style: headerStyle),
-  ));
-}
-
-// abstract class AppDelegate {
-//   TreeController<ChatThread> get chatThread;
-// }
-
-// late AppDelegate dgapp;
-
-class ChatTab extends StatefulWidget {
-  const ChatTab({Key? key}) : super(key: key);
-
-  @override
-  State<ChatTab> createState() => _ChatTabState();
-}
-
-class _ChatTabState extends State<ChatTab> {
-  @override
-  Widget build(BuildContext context) {
-    return PageScaffold(
-        leading: Container(),
-        title: Text('💬 Chat'),
-        search: 'Chats',
-        slivers: [HeadingSliver("📌 Pin", first: true), ListSliver2()]);
-  }
-}
-
-class ContactTab extends StatefulWidget {
-  const ContactTab({Key? key}) : super(key: key);
-
-  @override
-  State<ContactTab> createState() => _ContactTabState();
-}
-
-class _ContactTabState extends State<ContactTab> {
-  @override
-  Widget build(BuildContext context) {
-    return PageScaffold(
-        leading: Container(),
-        title: Text('$friend Contact'),
-        search: 'Contacts',
-        slivers: [HeadingSliver("📌 Pin", first: true), ListSliver2()]);
-  }
-}
-
-// this is a temporary thing, needed to keep things compiling.
-
-/*
-          ListSliver2(),
-          HeadingSliver("🕒 Recent"),
-          ListSliver2(),
-          HeadingSliver("👍 Favorites"),
-          ListSliver2(),
-          HeadingSliver("🤗 Awesome"),
-          ListSliver2(),
-CustomScrollView(
-      slivers: [
-        CupertinoSliverNavigationBar(
-            largeTitle: widget.title,
-            leading: Container(),
-            trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-              CupertinoButton(
-                  child: Icon(CupertinoIcons.add_circled), onPressed: _add),
-              CupertinoButton(
-                  child: Icon(CupertinoIcons.ellipsis_vertical),
-                  onPressed: () {
-                    showActionSheet(
-                        context, <Cmd>[Cmd(id: 'import', label: 'Import')]);
-                  }),
-            ])),
-
-        */

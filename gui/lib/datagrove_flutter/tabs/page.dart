@@ -1,5 +1,5 @@
 // how can we know if we are root? find our route?
-import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -12,8 +12,16 @@ import 'package:flutter/widgets.dart';
 
 import '../chat/messages.dart';
 import '../client/datagrove_flutter.dart';
-import '../tabs/home.dart';
-import 'menu.dart';
+import 'home.dart';
+import '../ui/menu.dart';
+
+Widget HeadingSliver(String s, {bool first = false}) {
+  return SliverToBoxAdapter(
+      child: Padding(
+    padding: EdgeInsets.only(left: 8.0, top: first ? 0 : 20, bottom: 8),
+    child: Text(s, style: headerStyle),
+  ));
+}
 
 class PageScaffold extends StatefulWidget {
   List<Widget> slivers;
@@ -102,7 +110,7 @@ class _PageScaffoldState extends State<PageScaffold> {
               delegate: SliverChildBuilderDelegate(
                   childCount: 10,
                   (BuildContext context, int index) =>
-                      CupertinoListTile(title: Text("$index"))))
+                      lt.CupertinoListTile(title: Text("$index"))))
         ]))
       ]);
     }
@@ -170,7 +178,7 @@ class _ListSliver2State extends State<ListSliver2> {
   Widget build(BuildContext context) {
     return SliverAnimatedList(
         initialItemCount: 10,
-        itemBuilder: (c, i, a) => CupertinoListTile(
+        itemBuilder: (c, i, a) => lt.CupertinoListTile(
             onTap: () {
               Navigator.of(context).push(
                   CupertinoPageRoute(builder: (context) => MessageScreen()));

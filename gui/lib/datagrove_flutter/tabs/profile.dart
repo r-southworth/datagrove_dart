@@ -1,4 +1,4 @@
-import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -9,7 +9,7 @@ import 'dart:typed_data';
 import '../client/datagrove_flutter.dart';
 import '../client/identity.dart';
 import '../ui/mobile_scanner.dart';
-import '../ui/page.dart';
+import 'page.dart';
 
 const teacher = "🧑🏽‍🏫";
 
@@ -55,7 +55,7 @@ class IdentityRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final h = hex.encode(id.uuid);
     return SliverToBoxAdapter(
-        child: CupertinoListTile(
+        child: lt.CupertinoListTile(
             leading:
                 id.isDefault ? Icon(CupertinoIcons.check_mark) : Container(),
             title: Text(id.name),

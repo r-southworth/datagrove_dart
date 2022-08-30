@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 const headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 18);
 
@@ -16,133 +14,25 @@ class Cmd {
 Future<Cmd?> showCmd(BuildContext context, List<Cmd> label,
     {String? title}) async {
   return await showCupertinoModalPopup<Cmd>(
-    context: context,
-    builder: (BuildContext context) => CupertinoActionSheet(
-      title: title == null ? null : Text(title, style: headerStyle),
-      // title: const Text('Title'),
-      // message: const Text('Message'),
-      actions: <CupertinoActionSheetAction>[
-        for (final o in label)
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context, o);
-            },
-            child: Text(o.label),
-          ),
-      ],
-      cancelButton: CupertinoActionSheetAction(
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        child: Text("Cancel"),
-      ),
-    ),
-  );
-}
-
-/*
-enum MenuSelection {
-  about,
-  showMessage,
-}
-
-class MyMenuBarApp extends StatefulWidget {
-  const MyMenuBarApp({Key? key}) : super(key: key);
-
-  @override
-  State<MyMenuBarApp> createState() => _MyMenuBarAppState();
-}
-
-class _MyMenuBarAppState extends State<MyMenuBarApp> {
-  String _message = 'Hello';
-  bool _showMessage = false;
-
-  void _handleMenuSelection(MenuSelection value) {
-    switch (value) {
-      case MenuSelection.about:
-        showAboutDialog(
-          context: context,
-          applicationName: 'MenuBar Sample',
-          applicationVersion: '1.0.0',
-        );
-        break;
-      case MenuSelection.showMessage:
-        setState(() {
-          _showMessage = !_showMessage;
-        });
-        break;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PlatformMenuBar(
-      menus: <MenuItem>[
-        PlatformMenu(
-          label: 'Flutter API Sample',
-          menus: <MenuItem>[
-            PlatformMenuItemGroup(
-              members: <MenuItem>[
-                PlatformMenuItem(
-                  label: 'About',
-                  onSelected: () {
-                    _handleMenuSelection(MenuSelection.about);
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+            title: title == null ? null : Text(title, style: headerStyle),
+            // title: const Text('Title'),
+            // message: const Text('Message'),
+            actions: <CupertinoActionSheetAction>[
+              for (final o in label)
+                CupertinoActionSheetAction(
+                  onPressed: () {
+                    Navigator.pop(context, o);
                   },
-                )
-              ],
-            ),
-            PlatformMenuItemGroup(
-              members: <MenuItem>[
-                PlatformMenuItem(
-                  onSelected: () {
-                    _handleMenuSelection(MenuSelection.showMessage);
-                  },
-                  shortcut: const CharacterActivator('m'),
-                  label: _showMessage ? 'Hide Message' : 'Show Message',
+                  child: PointerInterceptor(child: Text(o.label)),
                 ),
-                PlatformMenu(
-                  label: 'Messages',
-                  menus: <MenuItem>[
-                    PlatformMenuItem(
-                      label: 'I am not throwing away my shot.',
-                      shortcut: const SingleActivator(LogicalKeyboardKey.digit1,
-                          meta: true),
-                      onSelected: () {
-                        setState(() {
-                          _message = 'I am not throwing away my shot.';
-                        });
-                      },
-                    ),
-                    PlatformMenuItem(
-                      label:
-                          "There's a million things I haven't done, but just you wait.",
-                      shortcut: const SingleActivator(LogicalKeyboardKey.digit2,
-                          meta: true),
-                      onSelected: () {
-                        setState(() {
-                          _message =
-                              "There's a million things I haven't done, but just you wait.";
-                        });
-                      },
-                    ),
-                  ],
-                )
-              ],
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("Cancel"),
             ),
-            if (PlatformProvidedMenuItem.hasMenu(
-                PlatformProvidedMenuItemType.quit))
-              const PlatformProvidedMenuItem(
-                  type: PlatformProvidedMenuItemType.quit),
-          ],
-        ),
-      ],
-      body: Center(
-        child: Text(_showMessage
-            ? _message
-            : 'This space intentionally left blank.\n'
-                'Show a message here using the menu.'),
-      ),
-    );
-  }
+          ));
 }
-*/

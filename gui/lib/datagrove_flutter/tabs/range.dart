@@ -123,9 +123,9 @@ class _RangeBuilderState<T> extends State<RangeBuilder<T>> {
     // animated build rebuilds the list when the
 
     final count = widget.controller.length;
-    if (count == 0) {
-      return SliverToBoxAdapter(child: Text("Empty"));
-    }
+    // if (count == 0) {
+    //   return SliverToBoxAdapter(child: Text("Empty"));
+    // }
     // this needs its own controller? can we subclass ScrollController?
     // the scroll controller needs to be on CustomScr
     return SliverAnimatedList(

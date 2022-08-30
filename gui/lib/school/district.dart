@@ -1,4 +1,4 @@
-import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
 import 'package:flutter/cupertino.dart';
 
 import 'widget.dart';
@@ -108,7 +108,7 @@ class _FullPagePickerState extends State<FullPagePicker> {
       Expanded(
           child: ListView(children: [
         for (var o in selected)
-          CupertinoListTile(
+          lt.CupertinoListTile(
             title: Text(widget.cs.value[o]),
             onTap: () {
               Navigator.of(context).pop(widget.cs.code[o]);

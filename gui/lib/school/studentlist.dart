@@ -1,6 +1,6 @@
 // grid? rows? data table? some kind of cursor driven table.
 
-import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../datagrove_flutter/client/datagrove_flutter.dart';
@@ -39,7 +39,7 @@ class _StudentListState extends State<StudentList> {
         (BuildContext context, Student s, Animation<double> animation) {
       return SizeTransition(
           sizeFactor: animation,
-          child: CupertinoListTile(
+          child: lt.CupertinoListTile(
             title: Text("title"),
             subtitle: Text("subtitle"),
             leading: Text(""),
@@ -143,7 +143,7 @@ class _TableListState extends State<TableList> {
           initialItemCount: t.length,
           itemBuilder: (BuildContext context, int x, Animation<double> y) {
             var o = 0;
-            return CupertinoListTile(
+            return lt.CupertinoListTile(
                 title: t.rowTitle.build(t[o]), // Text(o.firstLast),
                 subtitle: t.subtitle.build(t[o]),
                 leading: t.subtitle.build(t[o]), // Text(o.statusAsEmoji),

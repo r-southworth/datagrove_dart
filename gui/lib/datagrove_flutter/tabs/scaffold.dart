@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../client/datagrove_flutter.dart';
 
 import '../client/identity.dart';
+import 'chat.dart';
+import 'contact.dart';
 import 'nav.dart';
 import 'profile.dart';
 
@@ -123,89 +125,3 @@ abstract class PageStacker {
   push(Widget w);
   pop();
 }
-
-/*
-       SliverAnimatedList(
-            initialItemCount: 10,
-            itemBuilder: (c, i, a) => CupertinoListTile(title: Text("pinned $i"))),
-
-        SliverToBoxAdapter(child: Text("More")),
-        SliverAnimatedList(
-            initialItemCount: 100,
-            itemBuilder: (c, i, a) => SliverToBoxAdapter(
-                child: SliverToBoxAdapter(
-                    child: CupertinoListTile(title: Text("asdf $i")))))
-
-*/
-
-// we need a router for each tab, is that possible?
-// what does it do on the web?
-
-
-
-// not clear if this should be here? we probably need to compose menus
-// based on the platform and the page
-
-//       if (PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.quit))
-//     const PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.quit),
-// ],
-
-/*var menu = <MenuItem>[
-  PlatformMenu(label: "Edit", menus: [
-    PlatformMenuItem(
-      label: "Cut",
-      onSelected: () {},
-    )
-  ]),
-  PlatformMenu(label: 'Flutter API Sample', menus: sharedmenu),
-];
-final sharedmenu = <MenuItem>[
-      PlatformMenuItemGroup(
-        members: <MenuItem>[
-          PlatformMenuItem(
-            label: 'About',
-            onSelected: () {
-              //_handleMenuSelection(MenuSelection.about);
-            },
-          )
-        ],
-      ),
-
-      PlatformMenuItemGroup(
-        members: <MenuItem>[
-          PlatformMenuItem(
-            onSelected: () {
-              // _handleMenuSelection(MenuSelection.showMessage);
-            },
-            shortcut: const CharacterActivator('m'),
-            label: "one", // _showMessage ? 'Hide Message' : 'Show Message',
-          ),
-          PlatformMenu(
-            label: 'Messages',
-            menus: <MenuItem>[
-              PlatformMenuItem(
-                label: 'I am not throwing away my shot.',
-                shortcut: const SingleActivator(LogicalKeyboardKey.digit1,
-                    meta: true),
-                onSelected: () {
-                  // setState(() {
-                  //   _message = 'I am not throwing away my shot.';
-                  // });
-                },
-              ),
-              PlatformMenuItem(
-                label:
-                    "There's a million things I haven't done, but just you wait.",
-                shortcut: const SingleActivator(LogicalKeyboardKey.digit2,
-                    meta: true),
-                onSelected: () {
-                  // setState(() {
-                  //   _message =
-                  //       "There's a million things I haven't done, but just you wait.";
-                  // });
-                },
-              ),
-            ],
-          )
-        ]
-*/

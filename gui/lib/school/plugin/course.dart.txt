@@ -1,5 +1,5 @@
 import 'package:admin1/shared/widget.dart';
-import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +98,7 @@ class _CourseEditorState extends State<CourseEditor> {
           child: SingleChildScrollView(
               child: Column(children: [
         for (final o in courses)
-          CupertinoListTile(
+          lt.CupertinoListTile(
               title: Text(o.title),
               trailing: CupertinoButton(
                   onPressed: () {}, child: Icon(CupertinoIcons.link)),

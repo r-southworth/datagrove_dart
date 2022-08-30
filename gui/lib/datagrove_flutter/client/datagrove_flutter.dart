@@ -1,15 +1,14 @@
-import 'package:convert/convert.dart';
+import 'package:convert/convert.dart' show hex;
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:universal_html/html.dart';
 
 import '../ui/mdown.dart';
 import 'package:provider/provider.dart';
 
 export '../tabs/home.dart';
-export '../ui/page.dart';
+export '../tabs/page.dart';
 export '../ui/schoolform.dart';
 
 import '../platform/speech.dart';
