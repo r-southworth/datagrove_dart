@@ -3,14 +3,21 @@ import { EditorView } from 'prosemirror-view'
 import { makeAutoObservable } from "mobx"
 import { observer } from "mobx-react"
 import { MarkdownSerializer } from '../editor/lib/markdown/serializer'
+import { TestSource } from '../store/scrollerSource'
+import { Scroller } from './scroller'
 
 export const webview = (window as any)?.chrome?.webview
+
+const scrollPane = document.getElementById('scrollPane')
+const source = new TestSource(20)
+const scroller = new Scroller(scrollPane, source)
 
 class AppState {
   view: EditorView | undefined
   serializer: MarkdownSerializer | undefined
   label = "Untitled"
   editorValue = ""
+  screen = "chat"
 
   constructor() {
     makeAutoObservable(this)
@@ -26,7 +33,13 @@ class AppState {
     }
   }
 
-  setView = (v: EditorView, s: MarkdownSerializer) =>{
+  setScreen = (s: string) => {
+    console.log(`screen ${s}`)
+    this.screen = s
+    scrollPane.style.display = s == "chat" ? "block" : "none";
+
+  }
+  setView = (v: EditorView, s: MarkdownSerializer) => {
     this.view = v
     this.serializer = s
   }
@@ -36,13 +49,13 @@ class AppState {
     const content = this.view.state.doc;
     return store.serializer.serialize(content)
   }
-  download = () =>{
+  download = () => {
     downloadString(store.label + ".md", this.asMarkdown())
   }
-  done = ()=> {
+  done = () => {
     if (webview)
       webview.postMessage(this.asMarkdown());
-    console.log("done",this)
+    console.log("done", this)
   }
 }
 export const store = new AppState();
