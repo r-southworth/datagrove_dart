@@ -1,3 +1,5 @@
+Currently this does not work with stable flutter, it requires at least beta to fix some bugs in the flutter/webview event system
+
 # use build
 flutter pub run build_runner build
 
