@@ -4,24 +4,24 @@ import '../../editor/editor.dart';
 import 'page.dart';
 import 'home.dart';
 
-class ContactTab extends StatefulWidget {
-  const ContactTab({Key? key}) : super(key: key);
+class MessageTab extends StatefulWidget {
+  const MessageTab({Key? key}) : super(key: key);
 
   @override
-  State<ContactTab> createState() => _ContactTabState();
+  State<MessageTab> createState() => _MessageTabState();
 }
 
 const friend = "🤝";
 
-class _ContactTabState extends State<ContactTab> {
+class _MessageTabState extends State<MessageTab> {
   @override
   Widget build(BuildContext context) {
     return EditorScreen();
 
     return PageScaffold(
         leading: Container(),
-        title: Text('$friend Contact'),
-        search: 'Contacts',
+        title: Text('$friend Messages'),
+        search: 'Messages',
         slivers: [HeadingSliver("📌 Pin", first: true), ListSliver2()]);
   }
 }

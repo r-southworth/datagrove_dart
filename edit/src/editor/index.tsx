@@ -530,7 +530,7 @@ type Step = {
   }
 
   createView() {
-    console.log("createView");
+    console.log("EDITOR createView");
     if (!this.element) {
       throw new Error("createView called before ref available");
     }

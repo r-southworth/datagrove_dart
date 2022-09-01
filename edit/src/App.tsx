@@ -70,7 +70,7 @@ const App = observer(({store}) => {
     }
   ]
 
-  console.log(store.screen)
+  console.log("SCREEN",store.screen)
   if (store.screen=="edit")
   return (
     <div style={{ height: '100%' }}>

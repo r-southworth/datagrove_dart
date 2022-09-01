@@ -15,6 +15,19 @@ const teacher = "🧑🏽‍🏫";
 
 // how should we pass around the identity?
 // should it be in a provider?
+// maybe this could be a start of a form engine
+Widget nullBuilder(BuildContext c) {
+  return Container();
+}
+
+class Profile {
+  String group = "";
+  String label = "";
+
+  Widget Function(BuildContext) builder = nullBuilder;
+
+  List<Profile> children = [];
+}
 
 class ProfileTab extends StatelessWidget {
   @override

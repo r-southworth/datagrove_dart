@@ -1,18 +1,9 @@
 // how can we know if we are root? find our route?
 import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
+import 'package:datagrove/editor/editor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
-// import 'button.dart';
-// import 'colors.dart';
-// import 'icons.dart';
-// import 'localizations.dart';
-// import 'text_field.dart';
-
-import '../chat/messages.dart';
 import '../client/datagrove_flutter.dart';
-import 'home.dart';
 import '../ui/menu.dart';
 
 Widget HeadingSliver(String s, {bool first = false}) {
@@ -181,7 +172,7 @@ class _ListSliver2State extends State<ListSliver2> {
         itemBuilder: (c, i, a) => lt.CupertinoListTile(
             onTap: () {
               Navigator.of(context).push(
-                  CupertinoPageRoute(builder: (context) => MessageScreen()));
+                  CupertinoPageRoute(builder: (context) => EditorScreen()));
             },
             leading: CircleAvatar(
                 backgroundColor: CupertinoColors.inactiveGray,
@@ -197,7 +188,6 @@ class _ListSliver2State extends State<ListSliver2> {
                         Cmd(id: 'report', label: 'Report'),
                       ],
                       title: 'pinned $i');
-                  print(id);
                 }),
             title: Text("pinned $i")));
   }

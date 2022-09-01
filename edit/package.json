@@ -43,7 +43,7 @@
     "react-portal": "^4.2.2",
     "refractor": "^4.8.0",
     "resize-observer-polyfill": "^1.5.1",
-    "slugify": "^1.6.5",
+    "slugify": "^1.6.5", 
     "smooth-scroll-into-view-if-needed": "^1.1.33"
   },
   "devDependencies": {
