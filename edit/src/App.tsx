@@ -56,51 +56,69 @@ function ChatEditor() {
 }
 
 
-const App = observer(({store}) => {
+const editText = (mainMenu) => (
+  <div style={{ height: '100%' }}>
 
-  const ex = () => (<EllipsisVerticalIcon className='h-6 w-6' />)
+    <Editor theme={dark} className='editor dark:prose-invert prose max-w-none'
+      defaultValue={store.editorValue}
+      placeholder="..." autoFocus />
+
+    <div className="appFooter flex">
+        <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
+      defaultValue={store.editorValue}
+      placeholder="..." autoFocus />
+      
+      <div className="grow" />
+      <EditMenu menu={mainMenu} />
+    </div>
+  </div>)
+
+const chat = (mainMenu) => (
+  <div style={{ height: '100%' }}>
+
+    <div className="appFooter flex">
+        <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
+      defaultValue={store.editorValue}
+      placeholder="..." autoFocus />
+      
+      <div className="grow" />
+      <EditMenu menu={mainMenu} />
+    </div>
+  </div>)
+
+const table = (mainMenu) => (
+  <div style={{ height: '100%' }}>
+
+    <div className="appFooter flex">
+        <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
+      defaultValue={store.editorValue}
+      placeholder="..." autoFocus />
+      
+      <div className="grow" />
+      <EditMenu menu={mainMenu} />
+    </div>
+  </div>)
+
+const App = observer(({store}) => {
   const mainMenu = [
     {
-      label: ex,
+      label:  () => (<EllipsisVerticalIcon className='h-6 w-6' />),
       children: [
         { label: () => ("Download"), do: () => store.download() },
         { label: () => ("Chat"), do: () => store.setScreen("chat")},
-        { label: () => ("Edit"), do: () => store.setScreen("edit")}
+        { label: () => ("Edit"), do: () => store.setScreen("edit")},
+        { label: () => ("Table"), do: () => store.setScreen("table")},
       ]
     }
   ]
 
-  console.log("SCREEN",store.screen)
-  if (store.screen=="edit")
-  return (
-    <div style={{ height: '100%' }}>
-
-      <Editor theme={dark} className='editor dark:prose-invert prose max-w-none'
-        defaultValue={store.editorValue}
-        placeholder="..." autoFocus />
-
-      <div className="appFooter flex">
-          <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
-        defaultValue={store.editorValue}
-        placeholder="..." autoFocus />
-        
-        <div className="grow" />
-        <EditMenu menu={mainMenu} />
-      </div>
-    </div>)
-  else {
-    return (
-      <div style={{ height: '100%' }}>
-  
-        <div className="appFooter flex">
-            <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
-          defaultValue={store.editorValue}
-          placeholder="..." autoFocus />
-          
-          <div className="grow" />
-          <EditMenu menu={mainMenu} />
-        </div>
-      </div>)
+  switch (store.screen){
+  case "edit":
+    return editText(mainMenu)
+  case "chat":
+    return chat(mainMenu);
+  case "table":
+    return table(mainMenu);
   }
 });
 

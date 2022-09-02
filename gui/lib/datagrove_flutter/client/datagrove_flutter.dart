@@ -15,6 +15,7 @@ import '../platform/speech.dart';
 export '../ui/date.dart';
 export '../ui/confirm.dart';
 export '../ui/mdown.dart';
+export 'router.dart';
 
 class Datagrove {
   static Future<Datagrove> open() async {
@@ -103,6 +104,15 @@ class FileStyle {
   }
 }
 
+enum GroupAuth {
+  none,
+  comment, // read with limited write.
+  write, // full write
+  admin, // full write + grant/revoke
+}
+
+typedef Suid = Uint8List; // varints
+
 class Dgf extends ChangeNotifier {
   final speech = Speech();
   // is it faster to nest maps, or try to use a hash map of the db,d pair?
@@ -122,6 +132,14 @@ class Dgf extends ChangeNotifier {
       required this.style,
       FileStyle? fileStyle}) {
     this.fileStyle = fileStyle ?? FileStyle.standard();
+  }
+
+  Future<GroupAuth> authorize(String group) async {
+    return GroupAuth.admin;
+  }
+
+  Future<Suid?> pubid(Suid groupid, String name) async {
+    return null;
   }
 
   // maybe the first linked account should create the database?

@@ -12,12 +12,9 @@ import 'range.dart';
 
 // is the state for this kept alive?
 class HomeTab extends StatefulWidget {
-  Widget title;
-  String label;
   Function()? add;
 
-  HomeTab({required this.title, required this.label, Key? key, this.add})
-      : super(key: key);
+  HomeTab({Key? key, this.add}) : super(key: key);
 
   @override
   State<HomeTab> createState() => _HomeTabState();
@@ -67,7 +64,7 @@ class _HomeTabState extends State<HomeTab> {
 
     return PageScaffold(
         leading: Container(),
-        title: widget.title,
+        title: const Text("🗺️ Datagrove"),
         add: () async {
           // we should skip this if there is exactly one thing to create.
           // but we might want to always support folders

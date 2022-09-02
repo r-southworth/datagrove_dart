@@ -5,14 +5,38 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Markdown Editor</title>
+    <style>
+      .cell {
+        display: none;
+        cursor: default;
+        user-select: none;
+        border: 1px solid red;
+      }
+      #cellEditor {
+        cursor: default;
+        user-select: none;
+        border: 1px solid blue;
+        position: fixed;
+        z-index: 200;
+        transform: translate(300px,500px);
+      }
+      #tablePane {
+        display: none
+      }
+    </style>
   </head>
   <body >
+    <div id="tablePane" >
+      <div id="cellEditor" >editor</div>
+    </div>
     <div id="scrollPane" ></div>
     <div id="root"></div>  
 
     <script type="module" src="/src/main.tsx"></script>
 
-    <div id="templates">
+    <div id="templates" style="display: none">
+      <div id="cell0" class='cell' style="position: fixed"></div>
+      
       <li class="chat-item" data-id="{{id}}">
         <div class="avatar" style="background-size: 32px 32px; background-image: url(/user-doctor.svg)"></div>
         <div class="bubble">

@@ -1,14 +1,105 @@
-// adapted from https://github.com/GoogleChromeLabs/ui-element-samples/tree/gh-pages/infinite-scroller
+// adapted from https://github.com/GoogleChromeLabs/ui-element-samples/tree/gh-pages/infinite-Table
+import { EditorState, Transaction } from "prosemirror-state";
+// connect over a web socket and let the server tell what to display. 
 
-// here T is a 
-export interface ScrollerSource<T> {
-    options: Options,
-    createTombstone(): HTMLElement
-    render(item: T, div: HTMLElement | undefined | null): HTMLElement
-    fetch(begin: number, count: number): Promise<T[]>
+
+// we need to update the controller in flutter when selection or scroll or edit state changes
+
+class Controller {
+    constructor(public ws: WebSocket){
+
+    }
+    // why would care if the selection remains active? pass back to the state?
+    updateSelection(s: Selection,requestMenu: boolean, session: number) {
+
+    }
+    updateScroll(x: number, y: number, zoom: number ){
+
+    }
+    updateCell(){
+
+    }
+    
+    static connect( ) {
+    var cn = new WebSocket("http://localhost/8033");
+    var controller = new Controller(cn);
+
+    var x = new Table(document.getElementById('tablePane'), controller );
+
+    // every call is a div, but the host doesn't know how large to make it.
+    // after we resize we might need to report back.
+
+    cn.onmessage = (ev: MessageEvent) => {
+
+    }
+    
+}
+}
+ 
+
+// we might need some delta's here to do this efficiently and allow animation
+// for example if we add a column we can either send the delta, or we can use diffs
+// diffs might work here if we require unique keys. Is this an easier approach than
+// trying to do deltas? keys are relatively easy to find for databases (attribute/primary key)
+// flutter key approach won't work exactly because it doesn't care about order?
+// probably a delta approach then.
+
+
+// flutter should set the edit state. 0 or one cell is eding
+// selecting rows is two way; we can't really put handles in flutter world and hope they 
+// sync. this is problematic with scrolling selections? lots of back and forth.
+// flutter should make sure that the selection stays on the screen?
+
+export class CellRange {
+    top=0
+    left=0
+    right=0
+    bottom=0;  // inclusive
 }
 
-export class Options {
+export class Selection {
+    range: CellRange[] = [];
+    editX = 0; // -1 no edit.
+    editY = 0;
+
+    static make(data: BigInt64Array):Selection{
+        return new Selection();
+    }
+}
+export class TableDelta {
+    selection: Selection
+
+    constructor(public data: BigInt64Array){
+
+    }
+
+    // Should we transfer as uint64 instead? no difference?
+    static make(data: BigInt64Array): TableDelta{
+        return new TableDelta(data);
+    }
+
+    apply(state: TableState<Row<Cell>> ){
+
+    }
+}
+
+
+
+export interface TableSource<T> {
+    options: TableOptions,
+
+
+    createTombstone(): HTMLElement
+    render(item: T, div: HTMLElement | undefined | null): HTMLElement
+
+    // this should probably alter the state, and return a description of what it did
+    // fetch is going to be called on scroll
+    fetch(begin: number, count: number): Promise<T[]>
+
+}
+
+
+export class TableOptions {
     fixedHeight = false
     RUNWAY_ITEMS = 50
 
@@ -22,30 +113,61 @@ export class Options {
     ANIMATION_DURATION_MS = 200
 }
 
-class Item<T> {
-    constructor(public data: T | undefined) { }
-    node: HTMLElement | null = null
-    height = 0
-    width = 0
-    top = 0
+// Table source should push data into the Table as well as pull?
+// we could use async, long polling style?
 
-}
-class Anchor {
-    index = 0
-    offset = 0
-}
+
+
 
 // we need this to be able to maintain history
 // maybe we don't need data, but rather a way to restore the data?
-// should we just keep the entire scroller though?
+// should we just keep the entire Table though?
 // can we detach the runway?
-export class ScrollerState<T> {
+export class TableState<T> {
     anchorItem: Anchor = { index: 0, offset: 0 };
     data: T[] = []
     scrollRunwayEnd_ = 0
     anchorScrollTop = 0;
 }
-export class Scroller<T> {
+
+enum Align {
+    begin,
+    center,
+    end
+}
+
+
+
+// we might want vertically align the cell in the height as begin,end,middle
+export class Cell {
+    content: any
+    width = 0
+    height = 0;
+    style = 0;
+}
+
+// can't this just be classes and styles? will apply after prosemirror based editor
+// generates html
+class Style {
+    className = "";
+    style = "";
+}
+class Column {
+   style =  new Style();
+}
+
+class Row<T> {
+    constructor(public data: T | undefined) { }
+    node: HTMLElement | null = null
+    height = 0
+    cell: Cell[] = [];
+    top = 0
+
+}
+export class Table<T> {
+    column: Column[] = [];
+    evenStyle = new Style();
+    oddStyle = new Style(); 
     // what do we gain keeping this? we need to reset all the item nodes anyway
     // maybe this should be a window, and not 0 based.
     // would it be better to use a key directly instead of needing to use integers?
@@ -53,9 +175,12 @@ export class Scroller<T> {
 
     // itemStart = 0 // invariant compared to anchorItem.index? max(anchorItem.index - 100)?
     // suma's code assumes we can keep an item for everything, start is always 0
-    items_: Item<T>[] = [];
 
-    state = new ScrollerState<T>()
+    // potentially integrate this? we always start with empty source and then stream deltas to it. are cell sources always a particular prosemirror document?
+    public source_: TableSource<T>
+
+    items_: Row<T>[] = [];
+    state = new TableState<T>()
 
     tombstoneSize_ = 0;
     tombstoneWidth_ = 0;
@@ -67,26 +192,28 @@ export class Scroller<T> {
 
     loadedItems_ = 0;
     requestInProgress_ = false;
-    // Create an element to force the scroller to allow scrolling to a certain
+
+    
+    // Create an element to force the Table to allow scrolling to a certain
     // point.
     scrollRunway_ = document.createElement('div');
 
+    update( ){
+
+    }
 
     constructor(
-        public scroller_: HTMLElement,
-        public source_: ScrollerSource<T>,
+        public ref: HTMLElement,
+        public controller: Controller,
     ) {
-        this.scroller_.addEventListener('scroll', () => this.onScroll_());
+        this.ref.addEventListener('scroll', () => this.onScroll_());
         window.addEventListener('resize', () => this.onResize_());
         this.scrollRunway_.textContent = ' ';
         this.scrollRunway_.style.position = 'absolute';
         this.scrollRunway_.style.height = '1px';
         this.scrollRunway_.style.width = '1px';
         this.scrollRunway_.style.transition = 'transform 0.2s';
-        this.scroller_.appendChild(this.scrollRunway_);
-
-
-
+        this.ref.appendChild(this.scrollRunway_);
         this.onResize_();
     }
     back() {
@@ -99,6 +226,8 @@ export class Scroller<T> {
         }
         this.onScroll_()
     }
+
+    // updating the runway translation moves all the items at once.
     updateRunway(curPos: number) {
         const o = this.source_.options;
         this.state.scrollRunwayEnd_ = Math.max(this.state.scrollRunwayEnd_, curPos + o.SCROLL_RUNWAY)
@@ -107,13 +236,13 @@ export class Scroller<T> {
     // when replacing the state, what do we do with the existing nodes?
     // can we store them as unused, make them invisible and keep with the state?
     // or .remove them? Or =null them?
-    replaceState(t: ScrollerState<T>) {
+    replaceState(t: TableState<T>) {
         this.state = t
         this.updateRunway(0)
     }
 
     onScroll_() {
-        var delta = this.scroller_.scrollTop - this.state.anchorScrollTop;
+        var delta = this.ref.scrollTop - this.state.anchorScrollTop;
 
         //Calculates the item that should be anchored after scrolling by delta 
         const calculateAnchoredItem = (initialAnchor: Anchor, delta: number): Anchor => {
@@ -144,7 +273,7 @@ export class Scroller<T> {
             };
         }
 
-        if (this.scroller_.scrollTop == 0) {
+        if (this.ref.scrollTop == 0) {
             // Special case, if we get to very top, always scroll to top.
             // this should probably trigger a pullToRefresh? but pull should be on the
             // bottom for chat.
@@ -155,8 +284,8 @@ export class Scroller<T> {
 
         // how do I change this state when replacing the state?
         // maybe this has to be in the state?
-        this.state.anchorScrollTop = this.scroller_.scrollTop;
-        var lastScreenItem = calculateAnchoredItem(this.state.anchorItem, this.scroller_.offsetHeight);
+        this.state.anchorScrollTop = this.ref.scrollTop;
+        var lastScreenItem = calculateAnchoredItem(this.state.anchorItem, this.ref.offsetHeight);
 
         const o = this.source_.options
 
@@ -176,13 +305,13 @@ export class Scroller<T> {
         // this just measures the size of a tombstone, then it discards what it knows about item layout; todo!! reuse an existing tombstone instead creating
         var tombstone = this.source_.createTombstone();
         tombstone.style.position = 'absolute';
-        this.scroller_.appendChild(tombstone);
+        this.ref.appendChild(tombstone);
         tombstone.classList.remove('invisible');
         this.tombstoneSize_ = tombstone.offsetHeight;
         this.tombstoneWidth_ = tombstone.offsetWidth;
-        this.scroller_.removeChild(tombstone);
+        this.ref.removeChild(tombstone);
 
-        // Reset the cached size of items in the scroller as they may no longer be
+        // Reset the cached size of items in the Table as they may no longer be
         // correct after the item content undergoes layout.
         for (var i = 0; i < this.items_.length; i++) {
             this.items_[i].height = this.items_[i].width = 0;
@@ -206,7 +335,7 @@ export class Scroller<T> {
     }
 
     /**
-     * Attaches content to the scroller and updates the scroll position if
+     * Attaches content to the Table and updates the scroll position if
      * necessary.
      */
 
@@ -277,7 +406,7 @@ export class Scroller<T> {
             // Maybe don't do this if it's already attached?
             node.style.position = 'absolute';
             this.items_[i].top = -1;
-            this.scroller_.appendChild(node);
+            this.ref.appendChild(node);
             this.items_[i].node = node;
         }
 
@@ -285,7 +414,7 @@ export class Scroller<T> {
         while (unusedNodes.length) {
             let u = unusedNodes.pop()
             if (u)
-                this.scroller_.removeChild(u);
+                this.ref.removeChild(u);
         }
 
         // Get the height of all nodes which haven't been measured yet.
@@ -350,7 +479,7 @@ export class Scroller<T> {
 
         // this monotonically increases the runway.
         this.updateRunway(curPos)
-        this.scroller_.scrollTop = this.state.anchorScrollTop;
+        this.ref.scrollTop = this.state.anchorScrollTop;
 
         const fn = () => {
             for (let [i, v] of tombstoneAnimations) {
@@ -388,8 +517,13 @@ export class Scroller<T> {
 
 
     addItem_(x: T | undefined) {
-        this.items_.push(new Item(x))
+        this.items_.push(new Row(x))
     }
 
 }
 
+
+class Anchor {
+    index = 0
+    offset = 0
+}

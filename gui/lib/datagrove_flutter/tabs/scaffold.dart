@@ -1,8 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:url_router/url_router.dart';
 import '../client/datagrove_flutter.dart';
 import 'package:path/path.dart' as p;
 
@@ -13,93 +14,25 @@ import 'nav.dart';
 import 'profile.dart';
 import 'starred.dart';
 
-// will call this twice currently; authenticate and then again to  generate
-// caching is hacky, but should work ok.
-class RouteParse {
-  static final cache = <String, RouteParse>{};
+// base32 only uses 2-7, can we use 0 in clever way? issue is that whatever we do we need to explain why you can't use a url to user, and the less likely the trap, the more painful when they fall in.
 
-  int tab = 0;
-  int cid = 0; // community id
-  int bid = 0; // branch id
-  int pid = 0; // publication id.
-  int gid = 0; // message group id, applies only to messages.
-  int iid = 0; // interior location
-  String iname = ""; // not guaranteed to be unique
+// urls look like host/{group-app-sponsor}/{publication id or query}?parameters
+// note is exactly one publication; to query more, we query on publication reference in that publication.
 
-  // this needs to verify that the user can access the url and redirect if not.
-  RouteParse parse(Dgf dg, String s) {
-    var ox = cache[s];
-    if (ox != null) {
-      return ox;
-    }
-    var o = s.length >= 2 ? s[1] : "";
-    var tab = <String, int>{"g": 0, "n": 1, "s": 2, "m": 3, "p": 4}[o] ?? 0;
-    switch (tab) {
-      case 0:
-        // check authorization.
-        // group-hyphen, publication-hypen, toc-hyphen
+// maybe this should cross to the isolate? it will be hard to keep cache
+// up to date here. could be laggy to contact isolate every time though.
 
-        var group = "";
-        var pub = "";
-        var inner = "";
-
-        //dg.authorize(group);
-        break;
-      case 4:
-        // with profiles we can jump to a particular screen.
-        // no authorization, this always the current user's profile
-        // plus a list of known alter-egos.
-
-        break;
-      case 3:
-        // we need to check authorization here
-        // with messages we can jump to a particular conversation and its information
-        // screen
-        break;
-      default:
-      // there is no depth to notify, stars
-    }
-
-    return RouteParse();
-  }
-}
+// resolving everything about the route may be
 
 // th
 makeRouter(Dgf dgf) {
   return UrlRouter(
-    // this can generate a stack of pages, when do we need this?
-    // what if "back" meant drawer? nested folders though.
-    // its not clear when jumping into a drive site if back is "up" or
-    // "previous page in timeline".
     onGeneratePages: (router) {
-      print("${router.url} ${router.urlPath}");
-
       return [
-        CupertinoPage(
-            child: TabScaffold(
-                path: router.url,
-                leading: Container(),
-                title: const Text("🗺️ Datagrove"),
-                label: 'Datagrove',
-                trailing: const [],
-                children: []))
+        CupertinoPage(child: TabScaffold())
         //MaterialPage(child: Text(router.url)),
       ];
     },
-// Optional, protect or redirect urls
-    onChanging: (router, newUrl) {
-      const authorized = true;
-      if (authorized == false) return '/'; // redirect to main view
-      return newUrl; // allow change
-    },
-    // use this to build our navigators together (one for each tab)
-    // note how strange this is for web; we have nested navigators galore
-    // does changing a url become a deep link that obliterates the other stacks?
-    // probably? making it sticky across tabs is odd too, but maybe you would expect
-    // it to default to last stack used rather than empty.
-    // builder: (router, navigator) {
-    //   return navigator; //Row(children: [const SideBar(), Expanded(child: navigator)],
-    // },
   );
 }
 
@@ -141,21 +74,9 @@ class DgApp extends StatelessWidget {
 
 // this needs a router, and global keys for its delegates
 class TabScaffold extends StatefulWidget {
-  List<Widget> children;
-  Widget? leading;
-  Widget title;
-  String label; // this is the plural name for your databases, e.g. "Schools"
-  List<Widget> trailing;
-  String path;
-  TabScaffold(
-      {Key? key,
-      required this.children,
-      this.leading,
-      required this.title,
-      required this.trailing,
-      required this.path,
-      required this.label})
-      : super(key: key) {}
+  TabScaffold({
+    Key? key,
+  }) : super(key: key) {}
 
   @override
   State<TabScaffold> createState() => TabScaffoldState();
@@ -168,70 +89,43 @@ class TabScaffold extends StatefulWidget {
 
 class TabScaffoldState extends State<TabScaffold> {
   int _selectedIndex = 0;
-  late List<NavTab> tab = [];
+
+  final tab = [
+    NavTab(
+        key: UniqueKey(),
+        icon: Icon(CupertinoIcons.tree),
+        label: 'Grove',
+        child: HomeTab()),
+    NavTab(
+        key: UniqueKey(),
+        icon: Icon(CupertinoIcons.bell),
+        label: 'Notify',
+        child: AlertTab()),
+    NavTab(
+        key: UniqueKey(),
+        icon: Icon(CupertinoIcons.star),
+        label: 'Starred',
+        child: StarredTab()),
+    NavTab(
+        key: UniqueKey(),
+        icon: Icon(Icons.mail),
+        label: 'Messages',
+        child: MessageTab()),
+    NavTab(
+      key: UniqueKey(),
+      icon: Icon(Icons.settings),
+      label: 'Profile',
+      child: ProfileTab(),
+    )
+  ];
 
   @override
   didUpdateWidget(TabScaffold old) {
     super.didUpdateWidget(old);
-    print("update state ${widget.path}");
-
-    var o = widget.path.length >= 2 ? widget.path[1] : "";
-    _selectedIndex =
-        <String, int>{"g": 0, "n": 1, "s": 2, "m": 3, "p": 4}[o] ?? 0;
-
-    switch (_selectedIndex) {
-      case 0:
-        // check authorization.
-        // group-hyphen, publication-hypen, toc-hyphen
-        break;
-      case 4:
-        // with profiles we can jump to a particular screen.
-        // no authorization, this always the current user's profile
-        // plus a list of known alter-egos.
-
-        break;
-      case 3:
-        // we need to check authorization here
-        // with messages we can jump to a particular conversation and its information
-        // screen
-        break;
-      default:
-      // there is no depth to notify, stars
-    }
   }
 
   initState() {
     super.initState();
-    print("init state ${widget.path}");
-
-    tab = [
-      NavTab(
-          key: UniqueKey(),
-          icon: Icon(CupertinoIcons.tree),
-          label: 'Grove',
-          child: HomeTab(title: widget.title, label: widget.label)),
-      NavTab(
-          key: UniqueKey(),
-          icon: Icon(CupertinoIcons.bell),
-          label: 'Notify',
-          child: AlertTab()),
-      NavTab(
-          key: UniqueKey(),
-          icon: Icon(CupertinoIcons.star),
-          label: 'Starred',
-          child: StarredTab()),
-      NavTab(
-          key: UniqueKey(),
-          icon: Icon(Icons.mail),
-          label: 'Messages',
-          child: MessageTab()),
-      NavTab(
-        key: UniqueKey(),
-        icon: Icon(Icons.settings),
-        label: 'Profile',
-        child: ProfileTab(),
-      )
-    ];
   }
 
   @override
@@ -256,8 +150,8 @@ class TabScaffoldState extends State<TabScaffold> {
                       setState(() {
                         // this isn't correct, we need to set whatever url
                         // is current for that navigator.
-                        context.url =
-                            <String>["/g", "/n", "/s", "/m", "/p"][index];
+                        // context.url =
+                        //     <String>["/g", "/n", "/s", "/m", "/p"][index];
                       });
                     },
                     items: [
@@ -272,8 +166,8 @@ class TabScaffoldState extends State<TabScaffold> {
                   selectedIndex: _selectedIndex,
                   onDestinationSelected: (int index) {
                     setState(() {
-                      context.url =
-                          <String>["/g", "/n", "/s", "/m", "/p"][index];
+                      // context.url =
+                      //     <String>["/g", "/n", "/s", "/m", "/p"][index];
                     });
                   },
                   labelType: NavigationRailLabelType.selected,
