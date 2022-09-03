@@ -5,10 +5,14 @@ import { observer } from "mobx-react"
 import { MarkdownSerializer } from '../editor/lib/markdown/serializer'
 import { TestSource } from '../store/scrollerSource'
 import { Scroller } from './scroller'
+import { test } from './canvas'
+
+
 
 export const webview = (window as any)?.chrome?.webview
-
+const tablePane = document.getElementById('tablePane')
 const scrollPane = document.getElementById('scrollPane')
+const rootPane = document.getElementById('root')
 const source = new TestSource(20)
 const scroller = new Scroller(scrollPane, source)
 
@@ -17,7 +21,7 @@ class AppState {
   serializer: MarkdownSerializer | undefined
   label = "Untitled"
   editorValue = ""
-  screen = "chat"
+  screen = "edit"
 
   constructor() {
     makeAutoObservable(this)
@@ -31,13 +35,18 @@ class AppState {
       })
       webview.postMessage("!~~!")
     }
+    this.setScreen(this.screen)
   }
 
   setScreen = (s: string) => {
     console.log(`screen ${s}`)
     this.screen = s
+    rootPane.style.display = s == "edit" ? "block" : "none";
     scrollPane.style.display = s == "chat" ? "block" : "none";
-
+    tablePane.style.display = s == "table" ? "block" : "none";
+    if (s=="table"){
+      test()
+    }
   }
   setView = (v: EditorView, s: MarkdownSerializer) => {
     this.view = v

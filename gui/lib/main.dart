@@ -15,9 +15,9 @@ void main() async {
 
   // at this point we know if we had already established a link
   final fl = await Dgf.open(
-      dnsName: 'pawpaw.datagrove.com',
+      dnsName: 'edit.datagrove.com',
       style: DgfStyle(
-        brandName: 'Pawpaw',
+        brandName: 'Datagrove',
       ));
 
   runApp(DgApp(fl));

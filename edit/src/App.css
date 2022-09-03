@@ -4,6 +4,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: black;
+  color: white;
 }
 .App{
   height: 100%;
@@ -255,3 +256,4 @@ width: 80%;
 .right-msg .msg-img {
   margin: 0 0 0 10px;
 }
+

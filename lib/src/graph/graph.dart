@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:search/src/builder/segment.dart';
+import '../builder/segment.dart';
 
 import 'lexer.dart';
 import 'package:stemmer/stemmer.dart';

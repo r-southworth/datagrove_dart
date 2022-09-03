@@ -1,35 +1,6 @@
 import { Scroller, Options, ScrollerSource } from './scroller'
 import { faker } from '@faker-js/faker'
 
-// there are two kinds of lists we care about
-
-// a query is fixed height 
-class TicketOrChannel {
-
-}
-
-// maybe this should be a class instead of an interface
-// it needs data, so that we can switch sources?
-// if we switch sources, what happens to all the tombstones?
-// seems like we might need two things, the adapter and the state
-// it doesn't make a lot of sense to to change the tombstones etc.
-class QuerySource implements ScrollerSource<TicketOrChannel>{
-    options: Options
-
-    constructor() {
-        this.options = new Options
-    }
-    fetch(begin: number, count: number): Promise<TicketOrChannel[]> {
-        throw new Error('Method not implemented.')
-    }
-    createTombstone(): HTMLElement {
-        throw new Error('Method not implemented.')
-    }
-    render(item: TicketOrChannel, div: HTMLElement | undefined | null): HTMLElement {
-        throw new Error('Method not implemented.')
-    }
-}
-
 
 
 function setText(div: HTMLElement, query: string, v: string) {
@@ -53,6 +24,7 @@ export class Chat {
     width = 0
     me = false
 }
+
 export function MakeChat(count: number) {
 
     let message: Chat[] = []

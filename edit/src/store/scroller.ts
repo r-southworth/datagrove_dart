@@ -1,10 +1,12 @@
-
-// we should allow two types:
-// 1. height is uniform, but content can change
-// 2. height is variable, but doesn't change after being displayed.
-
 // adapted from https://github.com/GoogleChromeLabs/ui-element-samples/tree/gh-pages/infinite-scroller
 
+// here T is a 
+export interface ScrollerSource<T> {
+    options: Options,
+    createTombstone(): HTMLElement
+    render(item: T, div: HTMLElement | undefined | null): HTMLElement
+    fetch(begin: number, count: number): Promise<T[]>
+}
 
 export class Options {
     fixedHeight = false
@@ -20,32 +22,17 @@ export class Options {
     ANIMATION_DURATION_MS = 200
 }
 
-// scroller source should push data into the scroller as well as pull?
-// we could use async, long polling style?
+class Item<T> {
+    constructor(public data: T | undefined) { }
+    node: HTMLElement | null = null
+    height = 0
+    width = 0
+    top = 0
 
-
-// in general we want to start our query at "now" and read into the past until we 
-// get to lastRead. If we do, then we also read start from last read backwards until 
-// we reach the limit, or we reach the first query
-// when positioning to the middle, we can interpolate the keys we have and create a key
-// that we will jump to. 
-export interface KeySource<T> {
-    fetch(begin: Uint8Array, end: Uint8Array, limit: number): Promise<T>
-    maybeMoreAfter(key: Uint8Array): boolean
-    maybeMoreBefore(key: Uint8Array): boolean
 }
-
-export interface ScrollerSource<T> {
-    options: Options,
-
-
-    createTombstone(): HTMLElement
-    render(item: T, div: HTMLElement | undefined | null): HTMLElement
-
-    // this should probably alter the state, and return a description of what it did
-    // fetch is going to be called on scroll
-    fetch(begin: number, count: number): Promise<T[]>
-
+class Anchor {
+    index = 0
+    offset = 0
 }
 
 // we need this to be able to maintain history
@@ -406,15 +393,3 @@ export class Scroller<T> {
 
 }
 
-class Item<T> {
-    constructor(public data: T | undefined) { }
-    node: HTMLElement | null = null
-    height = 0
-    width = 0
-    top = 0
-
-}
-class Anchor {
-    index = 0
-    offset = 0
-}

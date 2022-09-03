@@ -1,0 +1,93 @@
+import { Table, TableOptions, TableSource } from './table'
+import { faker } from '@faker-js/faker'
+
+// build a function that exercises the infinite grid view
+
+
+
+export class TestSource implements TableSource<Cell>{
+    tombstone
+    template
+    options
+    message: Cell[] = []
+
+    static     Make(count: number) {
+        let message: Cell[] = []
+        for (let i = 0; i != count; i++) {
+           const who = faker.datatype.number(1) == 0    
+           message[i] = {
+                id: i,
+                text: faker.lorem.paragraph(1),
+                image: who?'user-robot.svg':'user-doctor.svg',
+                height: 0,
+                width: 0,
+                time: Date(),
+                me: who
+            }
+        }
+        return message
+    }
+
+     setText(div: HTMLElement, query: string, v: string) {
+        let e = div.querySelector(query) as HTMLElement
+        if (!e) {
+            throw query
+        }
+        e.textContent = v;
+    }
+     setSrc(div: HTMLElement, query: string, v: string) {
+        //document.getElementById(query).style.backgroundImage=`url($v)`; 
+        let e = div.querySelector(query) as HTMLImageElement
+        e.src = v
+    }
+    
+
+    constructor(count: number) {
+        this.options = new TableOptions
+        this.tombstone = document.querySelector("#templates > .chat-item.tombstone") as Node
+        this.setSrc(this.tombstone as HTMLElement, '.avatar', 'user-robot.svg')
+        this.template = document.querySelector("#templates > .chat-item:not(.tombstone)") as Node
+        this.message = Cell.Make(count)
+    }
+
+
+    async fetch(start: number, end: number): Promise<Cell[]> {
+        if (start > this.message.length) {
+            return []
+        }
+        start = Math.max(start, 0)
+        end = Math.min(this.message.length, end)
+        return this.message.slice(start, end)
+    }
+    createTombstone(): HTMLElement {
+        return this.tombstone.cloneNode(true) as HTMLElement
+    }
+    render(item: Cell, div: HTMLElement | undefined): HTMLElement {
+        div = div || this.template.cloneNode(true) as HTMLElement
+        div.dataset.id = "asdf" + item.id;
+        this.setSrc(div, '.avatar', item.image)
+        this.setText(div, '.bubble p', item.text)
+        this.setText(div, '.bubble .posted-date', item.time.toString())
+
+        var img = div.querySelector('.bubble img') as HTMLImageElement
+        if (img) {
+            if (item.image !== '') {
+                img.classList.remove('invisible');
+                img.src = item.image
+                img.width = item.width;
+                img.height = item.height;
+            } else {
+                img.src = '';
+                img.classList.add('invisible');
+            }
+        }
+
+        if (item.me) {
+            div.classList.add('from-me');
+        } else {
+            div.classList.remove('from-me');
+        }
+        return div;
+    }
+}
+

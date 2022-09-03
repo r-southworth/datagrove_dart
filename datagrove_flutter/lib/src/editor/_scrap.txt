@@ -1,0 +1,84 @@
+
+// we might fight with iframes again in the near future
+
+
+class EasyEditor extends StatefulWidget {
+  const EasyEditor({Key? key}) : super(key: key);
+  @override
+  _EasyEditorState createState() => _EasyEditorState();
+}
+
+class _EasyEditorState extends State<EasyEditor> {
+  static ValueKey key = const ValueKey('key_0');
+
+  @override
+  Widget build(BuildContext context) {
+    return PointerInterceptor(
+        child: EasyWebView(
+      src: 'http://localhost:5173',
+      onLoaded: (_) {},
+      // this seems to just be debug when true, displays the url
+      //convertToWidgets: false,
+      key: key,
+    ));
+  }
+}
+
+class YoutubePip extends StatelessWidget {
+  bool youtubeOpen = false;
+  static ValueKey key3 = const ValueKey('key_2');
+  Widget child;
+  YoutubePip({required this.child});
+  @override
+  Widget build(BuildContext context) {
+    return Stack(children: <Widget>[
+      child,
+      Column(
+        children: <Widget>[
+          Expanded(
+            flex: 3,
+            child: Container(),
+          ),
+          Expanded(
+              flex: 1,
+              child: Container(
+                width: (youtubeOpen) ? 500 : 0,
+                child: EasyWebView(
+                  src: 'http://www.youtube.com/embed/IyFZznAk69U',
+                  onLoaded: (_) {},
+                  key: key3,
+                ),
+              )),
+        ],
+      )
+    ]);
+  }
+}
+
+void showAlertDialog(String content, BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (_) => PointerInterceptor(
+      intercepting: true,
+      child: AlertDialog(
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: Navigator.of(context, rootNavigator: true).pop,
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+  // what does it take to make this work?
+  Widget build2(BuildContext context) {
+    final w = EasyEditor();
+    return CustomScrollView(slivers: [
+      CupertinoSliverNavigationBar(
+        largeTitle: Text('Datagrove'),
+      ),
+      SliverToBoxAdapter(child: SizedBox(width: 400, height: 400, child: w))
+    ]);
+  }

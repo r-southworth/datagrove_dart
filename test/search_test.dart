@@ -1,4 +1,4 @@
-import 'package:search/search.dart';
+import 'package:datagrove/search.dart';
 import 'package:test/test.dart';
 
 void main() {
