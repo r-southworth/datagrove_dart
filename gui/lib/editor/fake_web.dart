@@ -1,3 +1,0 @@
-void registerWeb() {
-  // No-op.
-}

@@ -10,7 +10,7 @@ void main() async {
   final fl = await Dgf.open(
       dnsName: 'edit.datagrove.com',
       style: DgfStyle(
-        brandName: 'Datagrove',
+        brandName: 'Pawpaw',
       ));
 
   runApp(DgApp(fl));

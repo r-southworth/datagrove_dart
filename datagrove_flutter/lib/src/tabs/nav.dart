@@ -7,17 +7,12 @@ class NavTab extends StatefulWidget {
   // build the home page of the stack
   //final Widget Function(BuildContext) builder;
   final Widget child;
-  UniqueKey key;
 
   @override
   State<NavTab> createState() => _NavTabState();
 
-  NavTab(
-      {required this.icon,
-      required this.label,
-      required this.child,
-      required this.key})
-      : super(key: key);
+  NavTab({required this.icon, required this.label, required this.child})
+      : super(key: ValueKey(label));
 }
 
 class _NavTabState extends State<NavTab> {

@@ -24,21 +24,10 @@ import 'starred.dart';
 
 // resolving everything about the route may be
 
-// th
-makeRouter(Dgf dgf) {
-  return UrlRouter(
-    onGeneratePages: (router) {
-      return [
-        CupertinoPage(child: TabScaffold())
-        //MaterialPage(child: Text(router.url)),
-      ];
-    },
-  );
-}
-
 class DgApp extends StatelessWidget {
   Dgf fl;
-  DgApp(this.fl);
+  UrlRouter router;
+  DgApp({required this.fl, required this.router});
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +51,11 @@ class DgApp extends StatelessWidget {
                 Locale('es', ''),
                 Locale('fr', 'CA'),
               ],
-              routerDelegate: makeRouter(fl),
+              routerDelegate: router,
               //     RoutemasterDelegate(routesBuilder: (context) => routes),
               routeInformationParser: UrlRouteParser(),
 
-              title: "Datagrove",
+              title: fl.style.brandName,
               debugShowCheckedModeBanner: false,
             )));
   }
@@ -74,7 +63,9 @@ class DgApp extends StatelessWidget {
 
 // this needs a router, and global keys for its delegates
 class TabScaffold extends StatefulWidget {
+  List<NavTab> children;
   TabScaffold({
+    required this.children,
     Key? key,
   }) : super(key: key) {}
 
@@ -89,35 +80,6 @@ class TabScaffold extends StatefulWidget {
 
 class TabScaffoldState extends State<TabScaffold> {
   int _selectedIndex = 0;
-
-  final tab = [
-    NavTab(
-        key: UniqueKey(),
-        icon: Icon(CupertinoIcons.tree),
-        label: 'Grove',
-        child: HomeTab()),
-    NavTab(
-        key: UniqueKey(),
-        icon: Icon(CupertinoIcons.bell),
-        label: 'Notify',
-        child: AlertTab()),
-    NavTab(
-        key: UniqueKey(),
-        icon: Icon(CupertinoIcons.star),
-        label: 'Starred',
-        child: StarredTab()),
-    NavTab(
-        key: UniqueKey(),
-        icon: Icon(Icons.mail),
-        label: 'Messages',
-        child: MessageTab()),
-    NavTab(
-      key: UniqueKey(),
-      icon: Icon(Icons.settings),
-      label: 'Profile',
-      child: ProfileTab(),
-    )
-  ];
 
   @override
   didUpdateWidget(TabScaffold old) {
@@ -155,7 +117,7 @@ class TabScaffoldState extends State<TabScaffold> {
                       });
                     },
                     items: [
-                        for (var o in tab)
+                        for (var o in widget.children)
                           BottomNavigationBarItem(icon: o.icon, label: o.label)
                       ]),
             // we need to keep the navigation rail alive, and fade it out.
@@ -172,7 +134,7 @@ class TabScaffoldState extends State<TabScaffold> {
                   },
                   labelType: NavigationRailLabelType.selected,
                   destinations: [
-                    for (var o in tab)
+                    for (var o in widget.children)
                       NavigationRailDestination(
                         icon: o.icon,
                         selectedIcon: o.icon,
@@ -186,7 +148,8 @@ class TabScaffoldState extends State<TabScaffold> {
               // This is the main content.
               Expanded(
                   child: IndexedStack(
-                      index: _selectedIndex, children: [for (var o in tab) o]))
+                      index: _selectedIndex,
+                      children: [for (var o in widget.children) o]))
             ])));
   }
 }
