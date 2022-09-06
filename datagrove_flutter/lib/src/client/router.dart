@@ -1,63 +1,29 @@
-// is there any point to referencing a group by its id? seems dangerous.
-import 'datagrove_flutter.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// adapted from gskinner's flutter-url-router
-
-class RouteParse {
-  static const appTab = <String, int>{"g": 0, "n": 1, "s": 2, "m": 3, "p": 4};
-  static final cache = <String, RouteParse>{};
-  //
-  static final groupCache = <String, GroupCache>{};
-
-  // Surface these in the ux? we probably want more information than this?
-  // we don't want to bounce into isolate while rendering, but
-  String group = "";
-  String pub = "";
-
-  String location = "/";
-  int tab = 0;
-  late Suid groupid;
-  late Suid pubid;
-  GroupAuth auth = GroupAuth.none;
-}
-
 extension UrlRouterExtensions on BuildContext {
   UrlRouter get urlRouter => UrlRouter.of(this);
 
-  RouteParse get url => UrlRouter.of(this).url;
-  set url(RouteParse value) => UrlRouter.of(this).url = value;
+  String get url => UrlRouter.of(this).url;
 
-  /*
-  // 
+  set url(String value) => UrlRouter.of(this).url = value;
 
-  
   void urlPush(String value, [Map<String, String>? queryParams]) =>
       UrlRouter.of(this).push(value, queryParams);
 
   void urlPop([Map<String, String>? queryParams]) =>
       UrlRouter.of(this).pop(queryParams);
-  */
 }
 
-class UrlRouteParser extends RouteInformationParser<RouteParse> {
-  @override
-  Future<RouteParse> parseRouteInformation(
-      RouteInformation routeInformation) async {
-    return RouteParse();
-  }
-
-  @override
-  RouteInformation? restoreRouteInformation(RouteParse configuration) =>
-      RouteInformation(location: configuration.location);
-}
-
-class UrlRouter extends RouterDelegate<RouteParse>
+class UrlRouter extends RouterDelegate<String>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin {
   UrlRouter(
-      {String url = '/', this.onGeneratePages, this.builder, this.onPopPage}) {
+      {String url = '/',
+      this.onGeneratePages,
+      this.builder,
+      this.onPopPage,
+      this.onChanging}) {
     _initialUrl = url;
     assert(onGeneratePages != null || builder != null,
         'UrlRouter expects you to implement `builder` or `onGeneratePages` (or both)');
@@ -82,10 +48,14 @@ class UrlRouter extends RouterDelegate<RouteParse>
   /// Optionally provide a way for the parent to implement custom `onPopPage` logic.
   final PopPageCallback? onPopPage;
 
+  /// Optionally invoked just prior to the location being changed.
+  /// Allows a parent class to protect or redirect certain routes. The callback can return the original url to allow the location change,
+  /// or return a new url to redirect. If null is returned the location change will be ignored / blocked.
+  String? Function(UrlRouter router, String newLocation)? onChanging;
+
   /// Set from inside the build method, allows us to avoid passing context into delegates
   late BuildContext context;
 
-  /*
   Map<String, String> get queryParams {
     final Uri? uri = _getUri();
     if (uri == null) return {};
@@ -95,54 +65,54 @@ class UrlRouter extends RouterDelegate<RouteParse>
   set queryParams(Map<String, String> value) {
     url = _getUri().replace(queryParameters: value).toString();
   }
-    Uri _getUri() => Uri.tryParse(_url) ?? Uri(path: _initialUrl);
-      String get urlPath => _getUri().path;
-    */
 
   @override
   @protected
-  RouteParse? get currentConfiguration => _url;
+  String? get currentConfiguration => _url;
 
   @override
   GlobalKey<NavigatorState>? get navigatorKey => _navKey;
   final GlobalKey<NavigatorState> _navKey = GlobalKey();
 
-  late final String _initialUrl;
-  RouteParse _url = RouteParse();
-  RouteParse get url => _url;
-  set url(RouteParse value) {
-    _url = value;
-    notifyListeners();
-  }
-  /*
+  Uri _getUri() => Uri.tryParse(_url) ?? Uri(path: _initialUrl);
 
-    void push(String path, [Map<String, String>? queryParams]) =>
+  late final String _initialUrl;
+  String _url = '';
+  String get url => _url;
+  set url(String value) {
+    if (value != _url) {
+      // Allow onChanging to override the target path
+      String? newUrl =
+          onChanging == null ? value : onChanging?.call(this, value);
+      if (newUrl != null) {
+        _url = newUrl;
+        notifyListeners();
+      }
+    }
+  }
+
+  login(String value) {
+    // Allow onChanging to override the target path
+    String? newUrl = onChanging == null ? value : onChanging?.call(this, value);
+    if (newUrl != null) {
+      _url = newUrl;
+      notifyListeners();
+    }
+  }
+
+  String get urlPath => _getUri().path;
+
+  void push(String path, [Map<String, String>? queryParams]) =>
       _pushOrPop(path, queryParams);
 
   void pop([Map<String, String>? queryParams]) => _pushOrPop(null, queryParams);
-  void _pushOrPop([String? path, Map<String, String>? queryParams]) {
-    // Create a new list, because `pathSegments` is an unmodifiable list
-    final segments = List.from(_getUri().pathSegments);
-    // A null path indicates a pop vs push
-    bool pop = path == null;
-    if (pop && segments.length <= 1)
-      return; // Can't pop if we're down to 1 segment
-    // Add or remove a segment
-    pop ? segments.removeAt(segments.length - 1) : segments.add(path);
-    var newUrl = '/${segments.join('/')}';
-    if (queryParams != null) {
-      final queryString = Uri(queryParameters: queryParams).query;
-      if (queryString.isNotEmpty) {
-        newUrl += '?' + queryString;
-      }
-    }
-    url = newUrl;
-  }
-  */
 
   @override
-  Future<void> setInitialRoutePath(RouteParse configuration) {
-    _url = configuration;
+  Future<void> setInitialRoutePath(String configuration) {
+    if (configuration == '/') {
+      configuration = _url = _initialUrl;
+    }
+    url = configuration;
     super.setInitialRoutePath(url);
     return SynchronousFuture(null);
   }
@@ -172,8 +142,27 @@ class UrlRouter extends RouterDelegate<RouteParse>
 
   @override
   SynchronousFuture<void> setNewRoutePath(configuration) {
-    _url = configuration;
+    url = configuration;
     return SynchronousFuture(null);
+  }
+
+  void _pushOrPop([String? path, Map<String, String>? queryParams]) {
+    // Create a new list, because `pathSegments` is an unmodifiable list
+    final segments = List.from(_getUri().pathSegments);
+    // A null path indicates a pop vs push
+    bool pop = path == null;
+    if (pop && segments.length <= 1)
+      return; // Can't pop if we're down to 1 segment
+    // Add or remove a segment
+    pop ? segments.removeAt(segments.length - 1) : segments.add(path);
+    var newUrl = '/${segments.join('/')}';
+    if (queryParams != null) {
+      final queryString = Uri(queryParameters: queryParams).query;
+      if (queryString.isNotEmpty) {
+        newUrl += '?' + queryString;
+      }
+    }
+    url = newUrl;
   }
 }
 
@@ -186,111 +175,13 @@ class _InheritedRouterController extends InheritedWidget {
   bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
 }
 
-// url_router throws away the async nature of this, so we want it back.
-// also we don't need to return a string here, we can return something meaningful to our app.
+class UrlRouteParser extends RouteInformationParser<String> {
+  @override
+  Future<String> parseRouteInformation(
+          RouteInformation routeInformation) async =>
+      routeInformation.location ?? '/';
 
-class GroupCache {
-  GroupAuth auth = GroupAuth.none;
-  late Suid gid;
-  final pubCache = <String, Suid>{};
-
-  GroupCache(this.auth);
+  @override
+  RouteInformation? restoreRouteInformation(String configuration) =>
+      RouteInformation(location: configuration);
 }
-
-
-/*
-  int cid = 0; // community id
-  int bid = 0; // branch id
-  int pid = 0; // publication id.
-  int gid = 0; // message group id, applies only to messages.
-  int iid = 0; // interior location
-  String iname = ""; // not guaranteed to be unique
-
-  // this needs to verify that the user can access the url and redirect if not.
-  Future<RouteParse?> parse(Dgf dg, String s) async {
-    var r = RouteParse();
-
-    var uri = Uri.parse(s);
-    if (uri.pathSegments.length < 2) {
-      return null;
-    }
-    final tab = uri.pathSegments[0];
-    final tabn = appTab[tab];
-    if (tabn == null) {
-      return null;
-    }
-    r.tab = tabn;
-    r.url = s;
-
-    final group = uri.pathSegments[1];
-    var auth = groupCache[group];
-    if (auth == null) {
-      auth = GroupCache(await dg.authorize(group));
-      groupCache[group] == auth;
-    }
-    if (auth.auth == GroupAuth.none) {
-      return null;
-    }
-
-    // for our purposes here we only accept the name of the publication
-    // if this becomes a problem, (moved or conflict) we want to surface it
-    var pubname = uri.path.substring(group.length + 1);
-    var pid = auth.pubCache[pubname];
-    if (pid == null) {
-      pid = await dg.pubid(auth.gid, pubname);
-      if (pid == null) {
-        return null;
-      }
-      auth.pubCache[pubname] = pid;
-    }
-
-    final query = uri.queryParametersAll;
-    var gid = query['pid'];
-    if (gid == null) {}
-
-    // id or pubname must be provided
-
-    // uri.query; Map<String,String> so not not compliant
-    //uri.queryParametersAll; Map<String, List<String>> so compliant but not convenient
-
-    // if the link provides a name, we need to resolve it.
-
-    // cache the security/authorization checks
-    // this can still fail at the server level because of staleness on device
-    var ox = cache[s];
-    if (ox != null) {
-      return ox;
-    }
-
-    var o = s.length >= 2 ? s[1] : "";
-    switch (tab) {
-      case 0:
-        // check authorization.
-        // group-hyphen, publication-hypen, toc-hyphen
-
-        var group = "";
-
-        var pub = "";
-        var inner = "";
-
-        //dg.authorize(group);
-        break;
-      case 4:
-        // with profiles we can jump to a particular screen.
-        // no authorization, this always the current user's profile
-        // plus a list of known alter-egos.
-
-        break;
-      case 3:
-        // we need to check authorization here
-        // with messages we can jump to a particular conversation and its information
-        // screen
-        break;
-      default:
-      // there is no depth to notify, stars
-    }
-
-    return RouteParse();
-  }
-}
-*/

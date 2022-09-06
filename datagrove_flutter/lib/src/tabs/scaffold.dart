@@ -23,6 +23,65 @@ import 'starred.dart';
 // up to date here. could be laggy to contact isolate every time though.
 
 // resolving everything about the route may be
+class LoginScreen extends StatelessWidget {
+  Dgf dgf;
+  LoginScreen(this.dgf);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+            child: Container(
+                constraints: BoxConstraints(minWidth: 100, maxWidth: 400),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CupertinoFormSection.insetGrouped(children: [
+                        CupertinoTextFormFieldRow(
+                            autofocus: true,
+                            prefix: Text("User"),
+                            placeholder: "user"),
+                        CupertinoTextFormFieldRow(
+                          prefix: Text("Password"),
+                          placeholder: "password",
+                          obscureText: true,
+                        ),
+                        CupertinoFormRow(
+                          prefix: Text("Stay logged in"),
+                          child: CupertinoSwitch(
+                            onChanged: (bool value) {},
+                            value: true,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            CupertinoButton(
+                              child: Text("Sign in"),
+                              onPressed: () {
+                                dgf.isLogin = true;
+                                context.urlRouter.login("/");
+                              },
+                            ),
+                            CupertinoButton(
+                              child: Text("Sign up"),
+                              onPressed: () {
+                                dgf.isLogin = true;
+                                context.url = "/0";
+                              },
+                            ),
+                            CupertinoButton(
+                              child: Text("Link phone"),
+                              onPressed: () {
+                                dgf.isLogin = true;
+                                context.url = "/0";
+                              },
+                            )
+                          ],
+                        )
+                      ])
+                    ]))));
+  }
+}
 
 class DgApp extends StatelessWidget {
   Dgf fl;
@@ -64,7 +123,10 @@ class DgApp extends StatelessWidget {
 // this needs a router, and global keys for its delegates
 class TabScaffold extends StatefulWidget {
   List<NavTab> children;
+  final int initialTab;
+
   TabScaffold({
+    required this.initialTab,
     required this.children,
     Key? key,
   }) : super(key: key) {}
@@ -84,10 +146,13 @@ class TabScaffoldState extends State<TabScaffold> {
   @override
   didUpdateWidget(TabScaffold old) {
     super.didUpdateWidget(old);
+    _selectedIndex = widget.initialTab;
   }
 
+  @override
   initState() {
     super.initState();
+    _selectedIndex = widget.initialTab;
   }
 
   @override
@@ -110,10 +175,7 @@ class TabScaffoldState extends State<TabScaffold> {
                     currentIndex: _selectedIndex,
                     onTap: (index) {
                       setState(() {
-                        // this isn't correct, we need to set whatever url
-                        // is current for that navigator.
-                        // context.url =
-                        //     <String>["/g", "/n", "/s", "/m", "/p"][index];
+                        context.url = "/$index";
                       });
                     },
                     items: [
@@ -128,8 +190,7 @@ class TabScaffoldState extends State<TabScaffold> {
                   selectedIndex: _selectedIndex,
                   onDestinationSelected: (int index) {
                     setState(() {
-                      // context.url =
-                      //     <String>["/g", "/n", "/s", "/m", "/p"][index];
+                      context.url = "/$index";
                     });
                   },
                   labelType: NavigationRailLabelType.selected,

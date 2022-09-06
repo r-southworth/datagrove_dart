@@ -125,6 +125,7 @@ class Dgf extends ChangeNotifier {
   UserIdentity identity;
   DgfStyle style;
   late FileStyle fileStyle;
+  bool isLogin = false;
 
   static Dgf of(BuildContext context) => Provider.of<Dgf>(context);
   Dgf(

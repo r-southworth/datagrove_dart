@@ -61,7 +61,9 @@ const editText = (mainMenu) => (
 
     <Editor theme={dark} className='editor dark:prose-invert prose max-w-none'
       defaultValue={store.editorValue}
-      placeholder="..." autoFocus />
+      placeholder="..." autoFocus 
+      uploadImage={upload2}
+      />
 
     <div className="appFooter flex">
         <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
@@ -122,7 +124,10 @@ const App = observer(({store}) => {
   }
 });
 
-
+async function upload2(f: File) : Promise<string> {
+  console.log("image uploaded", f)
+  return "https://www.datagrove.com/bright_green_circle.png";
+}
 
 export default App
 

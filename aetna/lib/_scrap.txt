@@ -1,0 +1,22 @@
+// https://github.com/flutter/flutter/issues/31243
+// https://github.com/flutter/flutter/issues/72888
+// https://gist.github.com/emvaized/fa1ce586109196d7357652de2843b8ff
+class SliverTab extends StatelessWidget {
+  Widget title;
+  List<Widget> trailing;
+  SliverTab({required this.title, required this.trailing});
+  @override
+  Widget build(Object context) {
+    return CustomScrollView(slivers: [
+      CupertinoSliverNavigationBar(
+          leading: Container(),
+          largeTitle: title,
+          trailing: Row(mainAxisSize: MainAxisSize.min, children: trailing)),
+      const SliverToBoxAdapter(
+          child: Padding(
+              padding: EdgeInsets.all(8.0), child: CupertinoSearchTextField())),
+      // const SliverFillRemaining(
+      //     child: WebView(initialUrl: "https://www.datagrove.com"))
+    ]);
+  }
+}

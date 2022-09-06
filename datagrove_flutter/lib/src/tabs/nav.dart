@@ -1,6 +1,7 @@
 // wrap a navigator around
 import 'package:flutter/cupertino.dart';
 
+// each navtab owns a navigator, when you switch navtabs, you switch url stacks
 class NavTab extends StatefulWidget {
   final Icon icon;
   final String label;

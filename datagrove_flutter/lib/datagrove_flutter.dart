@@ -10,3 +10,4 @@ export 'src/ui/mdown.dart';
 export 'src/ui/app.dart';
 export 'src/tabs/home.dart';
 export 'src/tabs/scaffold.dart';
+export 'src/tabs/nav.dart';

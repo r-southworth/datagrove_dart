@@ -23,7 +23,9 @@ body {
   margin: 0;
   padding: 0;
 }
-
+[data-rmiz-ghost]{
+  display: none;
+}
 .ProseMirror {
   margin-left: 32px;
 
@@ -35,6 +37,7 @@ body {
   padding: 0;
 
 }
+
 .editor > div {
   height: 100%;
   width: 100%;
