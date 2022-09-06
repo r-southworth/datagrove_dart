@@ -2,23 +2,23 @@
 import { EditorView } from 'prosemirror-view'
 import { makeAutoObservable } from "mobx"
 import { observer } from "mobx-react"
-import { MarkdownSerializer } from '../editor/lib/markdown/serializer'
+import { MarkdownSerializer, MarkdownParser } from '../editor/lib/markdown/serializer'
 import { TestSource } from '../store/scrollerSource'
 import { Scroller } from './scroller'
 import { test } from './canvas'
+import { startCodeMirror, content } from './codemirror'
+import { parser, serializer } from '../editor/server'
 
-
-
-export const webview = (window as any)?.chrome?.webview
+export const webview = null //(window as any)?.chrome?.webview
 const tablePane = document.getElementById('tablePane')
 const scrollPane = document.getElementById('scrollPane')
+const codePane = document.getElementById('codePane')
 const rootPane = document.getElementById('root')
 const source = new TestSource(20)
 const scroller = new Scroller(scrollPane, source)
 
 class AppState {
   view: EditorView | undefined
-  serializer: MarkdownSerializer | undefined
   label = "Untitled"
   editorValue = ""
   screen = "edit"
@@ -44,22 +44,34 @@ class AppState {
     rootPane.style.display = s == "edit" ? "block" : "none";
     scrollPane.style.display = s == "chat" ? "block" : "none";
     tablePane.style.display = s == "table" ? "block" : "none";
-    if (s=="table"){
+    codePane.style.display = s == "code" ? "block" : "none";
+    if (s == "table") {
       test()
     }
   }
-  setView = (v: EditorView, s: MarkdownSerializer) => {
+  setView = (v: EditorView) => {
     this.view = v
-    this.serializer = s
   }
   asMarkdown = (): string => {
-    if (!this.view || !this.serializer) return "";
+    if (!this.view || !serializer) return "";
 
     const content = this.view.state.doc;
-    return store.serializer.serialize(content)
+    console.log(content.toJSON())
+    var txt = serializer.serialize(content)
+    console.log(txt)
+    return txt
   }
   download = () => {
     downloadString(store.label + ".md", this.asMarkdown())
+  }
+  editText = () => {
+    startCodeMirror(codePane, this.asMarkdown())
+    this.setScreen('code')
+  }
+  editRich = () => {
+    var s = content()
+    this.view.state.doc = parser.parse(s)
+    this.setScreen('edit')
   }
   done = () => {
     if (webview)

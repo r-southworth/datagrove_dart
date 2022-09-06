@@ -86,6 +86,8 @@ export { default as Extension } from "./lib/Extension";
 export const theme = lightTheme;
 
 export type Props = {
+  initState: (_: EditorView) => void;
+  dispose: () => void;
   id?: string;
   value?: string;
   defaultValue: string;
@@ -138,7 +140,7 @@ export type Props = {
   uploadImage?: (file: File) => Promise<string>;
   onBlur?: () => void;
   onFocus?: () => void;
-  onSave?: ({ done: boolean }) => void;
+  onSave?: ({ done }) => void;
   onCancel?: () => void;
   onChange?: (value: () => string) => void;
   onImageUploadStart?: () => void;
@@ -169,8 +171,10 @@ type State = {
 type Step = {
   slice?: Slice;
 };
- class RichMarkdownEditor extends React.PureComponent<Props, State> {
+class RichMarkdownEditor extends React.PureComponent<Props, State> {
   static defaultProps = {
+    initState: (_) => { },
+    dispose: () => { },
     defaultValue: "",
     dir: "auto",
     placeholder: "Write something nice…",
@@ -309,7 +313,7 @@ type Step = {
     this.view = this.createView();
     this.commands = this.createCommands();
 
-    store.setView(this.view,this.serializer)
+    this.props.initState(this.view)
   }
 
   createExtensions() {
@@ -526,7 +530,7 @@ type Step = {
   }
 
   createDocument(content: string) {
-    return this.parser.parse(content)||undefined
+    return this.parser.parse(content) || undefined
   }
 
   createView() {
@@ -549,7 +553,7 @@ type Step = {
       editable: () => !this.props.readOnly,
       nodeViews: this.nodeViews as any,
       handleDOMEvents: this.props.handleDOMEvents,
-      dispatchTransaction: function(transaction) {
+      dispatchTransaction: function (transaction) {
         // callback is bound to have the view instance as its this binding
         const { state, transactions } = this.state.applyTransaction(
           transaction
@@ -761,7 +765,7 @@ type Step = {
       >
         <ThemeProvider theme={this.theme()}>
           <React.Fragment>
-            <StyledEditor 
+            <StyledEditor
               dir={dir}
               rtl={isRTL}
               readOnly={readOnly}

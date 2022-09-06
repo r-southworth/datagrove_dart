@@ -48,41 +48,38 @@ function AppIssi() {
     </div>)
 }
 
-// how do we imitate placeholder?
-function ChatEditor() {
-  return (<div>
 
-  </div>)
-}
+const editText = (mainMenu) => {
+  const initState = (e) => store.setView(e)
+  return (
+    <div style={{ height: '100%' }}>
 
-
-const editText = (mainMenu) => (
-  <div style={{ height: '100%' }}>
-
-    <Editor theme={dark} className='editor dark:prose-invert prose max-w-none'
-      defaultValue={store.editorValue}
-      placeholder="..." autoFocus 
-      uploadImage={upload2}
+      <Editor theme={dark} className='editor dark:prose-invert prose max-w-none'
+        defaultValue={store.editorValue}
+        placeholder="..." autoFocus
+        uploadImage={upload2}
+        initState={initState}
       />
 
-    <div className="appFooter flex">
+      <div className="appFooter flex">
         <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
-      defaultValue={store.editorValue}
-      placeholder="..." autoFocus />
-      
-      <div className="grow" />
-      <EditMenu menu={mainMenu} />
-    </div>
-  </div>)
+          defaultValue={store.editorValue}
+          placeholder="..." autoFocus />
+
+        <div className="grow" />
+        <EditMenu menu={mainMenu} />
+      </div>
+    </div>)
+}
 
 const chat = (mainMenu) => (
   <div style={{ height: '100%' }}>
 
     <div className="appFooter flex">
-        <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
-      defaultValue={store.editorValue}
-      placeholder="..." autoFocus />
-      
+      <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
+        defaultValue={store.editorValue}
+        placeholder="..." autoFocus />
+
       <div className="grow" />
       <EditMenu menu={mainMenu} />
     </div>
@@ -92,39 +89,42 @@ const table = (mainMenu) => (
   <div style={{ height: '100%' }}>
 
     <div className="appFooter flex">
-        <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
-      defaultValue={store.editorValue}
-      placeholder="..." autoFocus />
-      
+      <Editor theme={dark} className=' chatEditor dark:prose-invert prose max-w-none'
+        defaultValue={store.editorValue}
+        placeholder="..." autoFocus />
+
       <div className="grow" />
       <EditMenu menu={mainMenu} />
     </div>
   </div>)
 
-const App = observer(({store}) => {
+const App = observer(({ store }) => {
   const mainMenu = [
     {
-      label:  () => (<EllipsisVerticalIcon className='h-6 w-6' />),
+      label: () => (<EllipsisVerticalIcon className='h-6 w-6' />),
       children: [
         { label: () => ("Download"), do: () => store.download() },
-        { label: () => ("Chat"), do: () => store.setScreen("chat")},
-        { label: () => ("Edit"), do: () => store.setScreen("edit")},
-        { label: () => ("Table"), do: () => store.setScreen("table")},
+        { label: () => ("Chat"), do: () => store.setScreen("chat") },
+        { label: () => ("Edit"), do: () => store.editRich() },
+        { label: () => ("Table"), do: () => store.setScreen("table") },
+        { label: () => ("Text"), do: () => store.editText() },
       ]
     }
   ]
 
-  switch (store.screen){
-  case "edit":
-    return editText(mainMenu)
-  case "chat":
-    return chat(mainMenu);
-  case "table":
-    return table(mainMenu);
+  switch (store.screen) {
+    case "edit":
+      return editText(mainMenu)
+    case "code":
+      return chat(mainMenu)
+    case "chat":
+      return chat(mainMenu);
+    case "table":
+      return table(mainMenu);
   }
 });
 
-async function upload2(f: File) : Promise<string> {
+async function upload2(f: File): Promise<string> {
   console.log("image uploaded", f)
   return "https://www.datagrove.com/bright_green_circle.png";
 }

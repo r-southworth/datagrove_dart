@@ -1,4 +1,5 @@
-import { parser } from "./server";
+import { parser } from "./server"
+import { test, expect } from "vitest"
 
 test("renders an empty doc", () => {
   const ast = parser.parse("");
@@ -7,4 +8,7 @@ test("renders an empty doc", () => {
     content: [{ type: "paragraph" }],
     type: "doc",
   });
+
+
+
 });

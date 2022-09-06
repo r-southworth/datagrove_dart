@@ -1,4 +1,5 @@
 import renderToHtml from "./renderToHtml";
+import { test, expect } from "vitest"
 
 test("renders an empty string", () => {
   expect(renderToHtml("")).toBe("");

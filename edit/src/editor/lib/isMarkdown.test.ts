@@ -1,4 +1,5 @@
 import isMarkdown from "./isMarkdown";
+import { test, expect } from "vitest"
 
 test("returns false for an empty string", () => {
   expect(isMarkdown("")).toBe(false);
