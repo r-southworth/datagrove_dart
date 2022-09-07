@@ -9,18 +9,55 @@ import { makeAutoObservable } from "mobx"
 import { observer } from "mobx-react"
 import { store } from "./store"
 import { dark } from './editor/styles/theme';
+import { CodeEditor } from './editor/codemirror'
 // ChevronDownIcon, ChevronUpIcon, XIcon,
 enum Mode {
   Normal,
   Search,
   Replace,
 }
+const mainMenu = [
+  {
+    label: () => (<EllipsisVerticalIcon className='h-6 w-6' />),
+    children: [
+      { label: () => ("Chat"), do: () => store.setScreen("chat") },
+      { label: () => ("Table"), do: () => store.setScreen("table") },
+      { label: () => ("Download"), do: () => store.download() },
+      { label: () => ("Text"), do: () => store.editText() },
+      { label: () => ("Edit"), do: () => store.editRich() },
+    ]
+  }
+]
 
-function AppBare() {
+function AppBare2() {
+  const initState = (e) => store.setView(e)
   return <Editor theme={dark} className='editor dark:prose-invert prose max-w-none'
     defaultValue={store.editorValue}
+    initState={initState}
     placeholder="..." autoFocus />
 }
+
+
+const AppBare =  observer(() => {
+  const initState = (e) => store.setView(e)
+  console.log("screen", store.screen)
+  switch (store.screen){
+    case 'text':
+      return <div className='app-wrap'><EditMenu menu={mainMenu}></EditMenu><CodeEditor 
+
+        extensions={[]}
+        /></div> 
+
+    case 'edit':
+    default:
+    return <div className='app-wrap'><EditMenu menu={mainMenu}></EditMenu><Editor theme={dark} className='editor dark:prose-invert prose max-w-none'
+      defaultValue={store.editorValue}
+      initState={initState}
+      placeholder="..." autoFocus /></div> 
+    
+
+  }
+})
 
 function AppIssi() {
   //const [mode, setMode] = useState(0)
@@ -50,6 +87,7 @@ function AppIssi() {
 
 
 const editText = (mainMenu) => {
+ 
   const initState = (e) => store.setView(e)
   return (
     <div style={{ height: '100%' }}>
@@ -98,19 +136,7 @@ const table = (mainMenu) => (
     </div>
   </div>)
 
-const App = observer(({ store }) => {
-  const mainMenu = [
-    {
-      label: () => (<EllipsisVerticalIcon className='h-6 w-6' />),
-      children: [
-        { label: () => ("Download"), do: () => store.download() },
-        { label: () => ("Chat"), do: () => store.setScreen("chat") },
-        { label: () => ("Edit"), do: () => store.editRich() },
-        { label: () => ("Table"), do: () => store.setScreen("table") },
-        { label: () => ("Text"), do: () => store.editText() },
-      ]
-    }
-  ]
+const App = observer(() => {
 
   switch (store.screen) {
     case "edit":
@@ -129,5 +155,6 @@ async function upload2(f: File): Promise<string> {
   return "https://www.datagrove.com/bright_green_circle.png";
 }
 
-export default App
+//export default App
 
+export default AppBare

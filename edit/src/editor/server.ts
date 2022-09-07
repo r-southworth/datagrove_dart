@@ -25,6 +25,7 @@ import Table from "./nodes/Table";
 import TableCell from "./nodes/TableCell";
 import TableHeadCell from "./nodes/TableHeadCell";
 import TableRow from "./nodes/TableRow";
+//import Mathblock from "./nodes/Mathblock";
 
 // marks
 import Bold from "./marks/Bold";
@@ -36,6 +37,7 @@ import Strikethrough from "./marks/Strikethrough";
 import TemplatePlaceholder from "./marks/Placeholder";
 import Underline from "./marks/Underline";
 
+
 const extensions = new ExtensionManager([
   new Doc(),
   new Text(),
@@ -44,6 +46,7 @@ const extensions = new ExtensionManager([
   new Blockquote(),
   new Emoji(),
   new BulletList(),
+  //new Mathblock(),
   new CodeBlock(),
   new CodeFence(),
   new CheckboxList(),
@@ -83,3 +86,8 @@ export const serializer = extensions.serializer();
 
 export const renderToHtml = (markdown: string): string =>
   render(markdown, extensions.rulePlugins);
+
+export function  getSchema() {
+  return schema
+}
+

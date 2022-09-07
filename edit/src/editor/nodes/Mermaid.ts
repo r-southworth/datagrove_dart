@@ -1,1 +1,0 @@
-import mermaid from 'mermaid'

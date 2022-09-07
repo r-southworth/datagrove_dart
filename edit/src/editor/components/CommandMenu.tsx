@@ -11,6 +11,7 @@ import getDataTransferFiles from "../lib/getDataTransferFiles";
 import filterExcessSeparators from "../lib/filterExcessSeparators";
 import insertFiles from "../commands/insertFiles";
 import baseDictionary from "../dictionary";
+import Extension from "../lib/Extension";
 
 const SSR = typeof window === "undefined";
 
@@ -298,7 +299,7 @@ class CommandMenu<T = MenuItem> extends React.Component<Props<T>, State> {
     this.props.onClearSearch();
   };
 
-  insertBlock(item) {
+  insertBlock(item: {name, attrs}) {
     this.clearSearch();
 
     const command = this.props.commands[item.name];

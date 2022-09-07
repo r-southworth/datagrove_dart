@@ -5,6 +5,7 @@ import * as React from "react";
 import ReactDOM from "react-dom";
 import Node from "./Node";
 import noticesRule from "../rules/notices";
+import { NodeSpec } from "prosemirror-model";
 
 export default class Notice extends Node {
   get styleOptions() {
@@ -23,7 +24,7 @@ export default class Notice extends Node {
     return [noticesRule];
   }
 
-  get schema() {
+  get schema() : NodeSpec {
     return {
       attrs: {
         style: {

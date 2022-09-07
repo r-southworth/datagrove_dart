@@ -4,10 +4,11 @@ import { MarkdownParser } from "prosemirror-markdown";
 import { MarkdownSerializer } from "./markdown/serializer";
 import Editor from "../";
 import Extension from "./Extension";
-import makeRules from "./markdown/rules";
 import Node from "../nodes/Node";
 import Mark from "../marks/Mark";
-import { PluginSimple } from "markdown-it";
+import markdownit,{ PluginSimple } from "markdown-it";
+
+
 
 export default class ExtensionManager {
   extensions: Extension[];
@@ -81,7 +82,15 @@ export default class ExtensionManager {
         };
       }, {});
 
-    return new MarkdownParser(schema, makeRules({ rules, plugins }), tokens);
+      const markdownIt = markdownit("default", {
+        breaks: false,
+        html: false,
+        linkify: false,
+        ...rules,
+      });
+      plugins.forEach(plugin => markdownIt.use(plugin));
+
+    return new MarkdownParser(schema, markdownIt, tokens);
   }
 
   get marks() {
@@ -158,8 +167,11 @@ export default class ExtensionManager {
     );
   }
 
+  // IMPORTANT; this collects all the menu commands.
+  // each extension can add commands to this.
   commands({ schema, view }) {
-    return this.extensions
+    console.log("commands",schema,view )
+    let cmd =  this.extensions
       .filter(extension => extension.commands)
       .reduce((allCommands, extension) => {
         const { name, type } = extension;
@@ -203,5 +215,7 @@ export default class ExtensionManager {
           ...commands,
         };
       }, {});
+      console.log("commands",cmd);
+      return cmd
   }
 }

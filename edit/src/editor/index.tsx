@@ -5,7 +5,7 @@ import { EditorState, Selection, Plugin } from "prosemirror-state";
 import { dropCursor } from "prosemirror-dropcursor";
 import { gapCursor } from "prosemirror-gapcursor";
 import { MarkdownParser, MarkdownSerializer } from "prosemirror-markdown";
-import { EditorView } from "prosemirror-view";
+import { EditorView , NodeView} from "prosemirror-view";
 import { Schema, NodeSpec, MarkSpec, Slice } from "prosemirror-model";
 import { inputRules, InputRule } from "prosemirror-inputrules";
 import { keymap } from "prosemirror-keymap";
@@ -26,6 +26,7 @@ import Extension from "./lib/Extension";
 import ExtensionManager from "./lib/ExtensionManager";
 import ComponentView from "./lib/ComponentView";
 import headingToSlug from "./lib/headingToSlug";
+import {CodeBlockView} from "./codemirror"
 
 // styles
 import { StyledEditor } from "./styles/editor";
@@ -54,7 +55,7 @@ import Table from "./nodes/Table";
 import TableCell from "./nodes/TableCell";
 import TableHeadCell from "./nodes/TableHeadCell";
 import TableRow from "./nodes/TableRow";
-
+//import Mathblock from "./nodes/Mathblock"
 // marks
 import Bold from "./marks/Bold";
 import Code from "./marks/Code";
@@ -78,7 +79,6 @@ import TrailingNode from "./plugins/TrailingNode";
 import PasteHandler from "./plugins/PasteHandler";
 import { PluginSimple } from "markdown-it";
 import { store } from "../store";
-
 export { schema, parser, serializer, renderToHtml } from "./server";
 
 export { default as Extension } from "./lib/Extension";
@@ -214,7 +214,7 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
   keymaps: Plugin[];
   inputRules: InputRule[];
   nodeViews: {
-    [name: string]: (node, view, getPos, decorations) => ComponentView;
+    [name: string]: (node, view, getPos, decorations) => NodeView //ComponentView;
   };
   nodes: { [name: string]: NodeSpec };
   marks: { [name: string]: MarkSpec };
@@ -345,6 +345,7 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
           new Notice({
             dictionary,
           }),
+          //new Mathblock({dictionary}),
           new Heading({
             dictionary,
             onShowToast: this.props.onShowToast,
@@ -448,7 +449,7 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
   }
 
   createNodeViews() {
-    return this.extensions.extensions
+    var o = this.extensions.extensions
       .filter((extension: ReactNode) => extension.component)
       .reduce((nodeViews, extension: ReactNode) => {
         const nodeView = (node, view, getPos, decorations) => {
@@ -467,6 +468,10 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
           [extension.name]: nodeView,
         };
       }, {});
+      return {
+        ...o,
+        code_block: (node, view, getPos) => new CodeBlockView(node, view, getPos)
+      }
   }
 
   createCommands() {
@@ -530,7 +535,12 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
   }
 
   createDocument(content: string) {
-    return this.parser.parse(content) || undefined
+    let o =  this.parser.parse(content) || undefined
+    let s = this.serializer.serialize(o)
+    let s2 = o.toString()
+
+    console.log(`createDocument(${content}\n${s2}\n${s})`,  o)
+    return o
   }
 
   createView() {
@@ -548,11 +558,15 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
     };
 
     const self = this; // eslint-disable-line
+
+    // this is 
+    console.log("props", this.props)
     const view = new EditorView(this.element, {
       state: this.createState(this.props.value),
       editable: () => !this.props.readOnly,
-      nodeViews: this.nodeViews as any,
+      nodeViews: this.nodeViews ,
       handleDOMEvents: this.props.handleDOMEvents,
+
       dispatchTransaction: function (transaction) {
         // callback is bound to have the view instance as its this binding
         const { state, transactions } = this.state.applyTransaction(

@@ -15,7 +15,11 @@ import {
   WarningIcon,
   InfoIcon,
   LinkIcon,
+  MathIcon,
+
+ 
 } from "outline-icons";
+import { ChartBarSquareIcon, PresentationChartBarIcon } from '@heroicons/react/24/solid'
 import { MenuItem } from "../types";
 import baseDictionary from "../dictionary";
 
@@ -146,5 +150,36 @@ export default function blockMenuItems(
       keywords: "container_notice card suggestion",
       attrs: { style: "tip" },
     },
+    {
+      name: "separator",
+    },
+    {name: "code_block",
+    title: dictionary.math,
+    icon: MathIcon,
+    keywords: "code_block katex math",
+    shortcut: "^ ⇧ $",
+    attrs: {
+      language: 'katex'
+    }
+  },
+    {name: "code_block",
+    title: 'Frappe',
+    icon: MathIcon,
+    keywords: "code_block katex math",
+    shortcut: "^ ⇧ c",
+    attrs: {
+      language: 'frappe'
+    },
+   },
+   ,
+    {name: "code_block",
+    title: 'Vega-lite',
+    icon: MathIcon,
+    keywords: "code_block katex math",
+    shortcut: "^ ⇧ v",
+    attrs: {
+      language: 'vega-lite'
+    },
+   },
   ];
 }

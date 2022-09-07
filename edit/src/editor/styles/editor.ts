@@ -306,6 +306,46 @@ export const StyledEditor = styled("div")<{
   .placeholder:nth-child(2):before {
     opacity: 1;
   }
+  .math-block {
+    display: flex;
+    align-items: center;
+    background: ${props => props.theme.background};
+    color: ${props => 'props.theme.noticeInfoText'};
+    border-radius: 4px;
+    padding: 8px 16px;
+    margin: 8px 0;
+
+    a {
+      color: ${props => props.theme.noticeInfoText};
+    }
+
+    a:not(.heading-name) {
+      text-decoration: underline;
+    }
+  }
+  .math-block.katex {
+    background: ${props => props.theme.background};
+    color: ${props => props.theme.noticeTipText};
+
+    a {
+      color: ${props => props.theme.noticeTipText};
+    }
+  }
+
+  .math-block .content {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  .math-block .icon {
+    width: 24px;
+    height: 24px;
+    align-self: flex-start;
+    margin-${props => (props.rtl ? "left" : "right")}: 4px;
+    position: relative;
+    top: 1px;
+  }
+
 
   .notice-block {
     display: flex;
@@ -555,6 +595,7 @@ export const StyledEditor = styled("div")<{
   }
 
   .code-block,
+  .math-block,
   .notice-block {
     position: relative;
 
@@ -580,6 +621,12 @@ export const StyledEditor = styled("div")<{
     }
 
     &.notice-block {
+      select,
+      button {
+        ${props => (props.rtl ? "left" : "right")}: 4px;
+      }
+    }
+    &.math-block {
       select,
       button {
         ${props => (props.rtl ? "left" : "right")}: 4px;

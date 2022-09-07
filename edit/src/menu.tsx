@@ -15,7 +15,6 @@ export interface MenuItem {
   children?: MenuItem[],
 }
 
-
 export default function EditMenu({menu}:{menu: MenuItem[]}) {
   let key = 0;
   const item = (mx: MenuItem) => {
@@ -35,8 +34,8 @@ export default function EditMenu({menu}:{menu: MenuItem[]}) {
           </Menu.Item>)
   }
   const menu1 = (m1: MenuItem) =>{
-    return (<Menu as="div" key={key++} className="relative inline-block text-left">
-    <div>
+    return (<Menu as="div" key={key++} className="app-menu  inline-block text-left">
+    <div >
       <Menu.Button className="mr-2">  
         { m1.label() }
       </Menu.Button>

@@ -1,74 +1,34 @@
-import {refractor} from 'refractor/lib/core'
-import bash from "refractor/lang/bash";
-import css from "refractor/lang/css";
-import clike from "refractor/lang/clike";
-import csharp from "refractor/lang/csharp";
-import go from "refractor/lang/go";
-import java from "refractor/lang/java";
-import javascript from "refractor/lang/javascript";
-import json from "refractor/lang/json";
-import markup from "refractor/lang/markup";
-import objectivec from "refractor/lang/objectivec";
-import perl from "refractor/lang/perl";
-import php from "refractor/lang/php";
-import python from "refractor/lang/python";
-import powershell from "refractor/lang/powershell";
-import ruby from "refractor/lang/ruby";
-import rust from "refractor/lang/rust";
-import sql from "refractor/lang/sql";
-import typescript from "refractor/lang/typescript";
-import yaml from "refractor/lang/yaml";
+
 
 import { Selection, TextSelection, Transaction } from "prosemirror-state";
 import { textblockTypeInputRule } from "prosemirror-inputrules";
 import copy from "copy-to-clipboard";
-import Prism, { LANGUAGES } from "../plugins/Prism";
+//import Prism, { LANGUAGES } from "../plugins/Prism";
 import toggleBlockType from "../commands/toggleBlockType";
 import isInCode from "../queries/isInCode";
 import Node from "./Node";
 import { ToastType } from "../types";
+import { NodeSpec } from "prosemirror-model"
 
 const PERSISTENCE_KEY = "rme-code-language";
 const DEFAULT_LANGUAGE = "javascript";
 
-[
-  bash,
-  css,
-  clike,
-  csharp,
-  go,
-  java,
-  javascript,
-  json,
-  markup,
-  objectivec,
-  perl,
-  php,
-  python,
-  powershell,
-  ruby,
-  rust,
-  sql,
-  typescript,
-  yaml,
-].forEach(refractor.register);
 
 export default class CodeFence extends Node {
-  get languageOptions() {
-    return Object.entries(LANGUAGES);
-  }
+
 
   get name() {
     return "code_fence";
   }
 
-  get schema() {
+  get schema() : NodeSpec {
     return {
       attrs: {
         language: {
           default: DEFAULT_LANGUAGE,
         },
       },
+      isolating: true,
       content: "text*",
       marks: "",
       group: "block",
@@ -88,6 +48,7 @@ export default class CodeFence extends Node {
           },
         },
       ],
+      // note that this not used at all, it is overridden in codemirror.ts
       toDOM: node => {
         const button = document.createElement("button");
         button.innerText = "Copy";
@@ -97,7 +58,7 @@ export default class CodeFence extends Node {
         const select = document.createElement("select");
         select.addEventListener("change", this.handleLanguageChange);
 
-        this.languageOptions.forEach(([key, label]) => {
+        ["katex","mermaid","graphjs","vega-lite"].forEach(([key, label]) => {
           const option = document.createElement("option");
           const value = key === "none" ? "" : key;
           option.value = value;
@@ -200,7 +161,7 @@ export default class CodeFence extends Node {
   };
 
   get plugins() {
-    return [Prism({ name: this.name })];
+    return [] // [Prism({ name: this.name })];
   }
 
   inputRules({ type }) {

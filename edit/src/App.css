@@ -260,3 +260,27 @@ width: 80%;
   margin: 0 0 0 10px;
 }
 
+.cm-wrapper {
+  margin-left: -32px
+}
+.cm-show {
+  text-align: center;
+
+  padding: 14px
+}
+.cm-lang {
+  text-align: center
+}
+
+.app-menu {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 3444;
+  padding: 4px;
+  text-align: center;
+}
+.app-wrap {
+  overflow-y: auto;
+  height: 100%;
+}
