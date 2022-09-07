@@ -1,11 +1,8 @@
-import React, { Fragment, useState } from 'react'
+
 import EditMenu from './menu'
 import Editor from "./editor"
 import './App.css'
-import { EllipsisVerticalIcon, ChevronLeftIcon, PlusCircleIcon } from '@heroicons/react/24/solid'
-import { ellipsis } from 'prosemirror-inputrules'
-import { EditorView } from 'prosemirror-view'
-import { makeAutoObservable } from "mobx"
+import { EllipsisVerticalIcon, ChevronLeftIcon } from '@heroicons/react/24/solid'
 import { observer } from "mobx-react"
 import { store } from "./store"
 import { dark } from './editor/styles/theme';
@@ -29,32 +26,23 @@ const mainMenu = [
   }
 ]
 
-function AppBare2() {
-  const initState = (e) => store.setView(e)
-  return <Editor theme={dark} className='editor dark:prose-invert prose max-w-none'
-    defaultValue={store.editorValue}
-    initState={initState}
-    placeholder="..." autoFocus />
-}
-
-
-const AppBare =  observer(() => {
+const AppBare = observer(() => {
   const initState = (e) => store.setView(e)
   console.log("screen", store.screen)
-  switch (store.screen){
+  switch (store.screen) {
     case 'text':
-      return <div className='app-wrap'><EditMenu menu={mainMenu}></EditMenu><CodeEditor 
-
+      return <div className='app-wrap'><EditMenu menu={mainMenu}></EditMenu><CodeEditor
         extensions={[]}
-        /></div> 
+      /></div>
 
     case 'edit':
     default:
-    return <div className='app-wrap'><EditMenu menu={mainMenu}></EditMenu><Editor theme={dark} className='editor dark:prose-invert prose max-w-none'
-      defaultValue={store.editorValue}
-      initState={initState}
-      placeholder="..." autoFocus /></div> 
-    
+      return <div className='app-wrap'><EditMenu menu={mainMenu}></EditMenu><Editor theme={dark} className='editor dark:prose-invert prose max-w-none'
+        defaultValue={store.editorValue}
+        initState={initState}
+        uploadImage={upload2}
+        placeholder="..." autoFocus /></div>
+
 
   }
 })
@@ -87,7 +75,7 @@ function AppIssi() {
 
 
 const editText = (mainMenu) => {
- 
+
   const initState = (e) => store.setView(e)
   return (
     <div style={{ height: '100%' }}>
@@ -151,8 +139,7 @@ const App = observer(() => {
 });
 
 async function upload2(f: File): Promise<string> {
-  console.log("image uploaded", f)
-  return "https://www.datagrove.com/bright_green_circle.png";
+  return URL.createObjectURL(f)
 }
 
 //export default App
