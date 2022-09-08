@@ -126,7 +126,7 @@ class TabScaffold extends StatefulWidget {
   final int initialTab;
 
   TabScaffold({
-    required this.initialTab,
+    this.initialTab = 0,
     required this.children,
     Key? key,
   }) : super(key: key) {}

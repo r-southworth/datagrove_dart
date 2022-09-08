@@ -21,9 +21,7 @@ class Tab extends StatelessWidget {
   @override
   Widget build(Object context) {
     return CustomScrollView(slivers: [
-      CupertinoSliverNavigationBar(
-        largeTitle: title),
-      )
+      CupertinoSliverNavigationBar(largeTitle: title),
     ]);
   }
 }
@@ -35,7 +33,9 @@ makeRouter(Dgf dgf) {
         CupertinoPage(
             child: TabScaffold(children: [
           NavTab(
-              icon: Icon(CupertinoIcons.folder), label: 'Browse', child: Tab(title: Text( "Browse"))),
+              icon: Icon(CupertinoIcons.folder),
+              label: 'Browse',
+              child: Tab(title: Text("Browse"))),
         ]))
         //MaterialPage(child: Text(router.url)),
       ];

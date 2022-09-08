@@ -45,6 +45,8 @@ class _TabState extends State<Tab> {
   @override
   Widget build(Object context) {
     switch (widget.index) {
+      // 0 is sorted by time.
+      // 1 is sorted by datum
       case 0:
         return CustomScrollView(slivers: [
           CupertinoSliverNavigationBar(
@@ -59,9 +61,21 @@ class _TabState extends State<Tab> {
           Cursor<String>(
               value: recentCursor,
               builder: (BuildContext context, int index, String value) {
-                return CupertinoListTile(title: Text(value));
+                return CupertinoListTile(
+                    title: Text(value),
+                    onTap: () {
+                      // this needs to slide out all the tabs.
+                      context.urlRouter.url = "/0/$index";
+                    });
               })
         ]);
+      case 1:
+      // browse for a ticket, or search for one.
+      case 2:
+      // interesting statistics about tickets
+      case 3:
+      // profile
+
     }
     return Scaffold(
         appBar: CupertinoNavigationBar(
@@ -91,10 +105,6 @@ makeRouter(Dgf dgf) {
       return [CupertinoPage(child: LoginScreen(dgf))];
     }
 
-    // if (router.url.startsWith("/login")) {
-
-    // }
-
     // we need to pull out the tab - query parameters or path?
     var p = router.url.split("/");
     var tab = p.length > 1 ? clamp(p[1], 0, 4) : 0;
@@ -111,6 +121,7 @@ makeRouter(Dgf dgf) {
       )
     ];
 
+    // this gives us the base page
     List<CupertinoPage> r = [
       CupertinoPage(
           child: TabScaffold(initialTab: tab, children: [
@@ -135,6 +146,10 @@ makeRouter(Dgf dgf) {
     ];
     switch (tab) {
       case 0:
+        // if there is another part, then we need to add a deeper level
+        if (p.length > 2) {
+          r.add(CupertinoPage(child: TicketPage()));
+        }
         break;
       case 1:
         break;
@@ -146,4 +161,23 @@ makeRouter(Dgf dgf) {
 
     return r;
   });
+}
+
+class TicketPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // this is mostly going to be a web page, it probably needs a fixed header
+    return Scaffold(
+        appBar: CupertinoNavigationBar(
+            middle: Text("Ticket #234"),
+            leading: CupertinoButton(
+              child: Icon(CupertinoIcons.left_chevron),
+              onPressed: () {
+                context.urlRouter.pop();
+              },
+            )),
+        body: SizedBox(
+            height: 400,
+            child: const WebView(initialUrl: 'https://www.datagrove.com')));
+  }
 }
