@@ -12,12 +12,15 @@ export '../tabs/home.dart';
 export '../tabs/page.dart';
 //export '../ui/schoolform.dart';
 
-import '../platform/speech.dart';
 export '../ui/date.dart';
 export '../ui/confirm.dart';
 export '../ui/mdown.dart';
+export '../ui/install.dart';
+export '../ui/dialog.dart';
+export '../ui/settings.dart';
 export 'router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Datagrove {
   static Future<Datagrove> open() async {
@@ -39,32 +42,16 @@ class UserIdentity {
   });
 
   static UserIdentity empty() {
-    return UserIdentity(isDefault: true, uuid: Uint8List(0), name: '');
+    return UserIdentity(isDefault: true, uuid: Uint8List(0), name: 'anonymous');
   }
 }
 
-// you could have multiple identities, but you must have at least one
-// we can generate, store a default identity that linking then changes.
-
-// singleton in the engine per window model
-// will there ever be another model though?
-
-// there will be one of these per window, it represents a logged in user
-// we might need an extra level of sharing depending on how we implement
-// the multiwindow model. (e.g. KeyChain is global, all windows have logically the same keychain)
-
+// I would think we could include brandName in the normal translation bundles?
 class DgfStyle {
-  // provide a link for onboarding instructions
-  // should probably break this out.
   String brandName;
-  late Widget desktopLink;
   DgfStyle({
     required this.brandName,
-    Widget? desktopLink,
-  }) {
-    this.desktopLink =
-        desktopLink ?? MarkdownSliver("Use $brandName on your phone to link");
-  }
+  }) {}
 }
 
 class MimeStyle {
@@ -115,24 +102,23 @@ enum GroupAuth {
 
 typedef Suid = Uint8List; // varints
 
+// notifies on logout?
 class Dgf extends ChangeNotifier {
-  final speech = Speech();
-  // is it faster to nest maps, or try to use a hash map of the db,d pair?
-
-  String dnsName;
-  bool startup = true;
   Datagrove server;
   UserIdentity identity;
+  List<UserIdentity> identities = [UserIdentity.empty()];
   DgfStyle style;
   late FileStyle fileStyle;
   bool isLogin = false;
+  FlutterSecureStorage keychain;
 
   static Dgf of(BuildContext context) => Provider.of<Dgf>(context);
   Dgf(
-      {required this.dnsName, // pawpaw.datagrove.com
+      { // pawpaw.datagrove.com
       required this.server,
       required this.identity,
       required this.style,
+      required this.keychain,
       FileStyle? fileStyle}) {
     this.fileStyle = fileStyle ?? FileStyle.standard();
   }
@@ -145,8 +131,16 @@ class Dgf extends ChangeNotifier {
     return null;
   }
 
-  // maybe the first linked account should create the database?
-  bool get unlinked => false;
+  // creates an identity from a bip39
+  createIdentity(String seed) {
+    isLogin = true;
+    // not really
+    keychain.write(key: "default", value: seed);
+  }
+
+  // if this is the default, then we need to pick another default
+  // if its the last identity then we need to trigger the onboard?
+  dropIdentity(String key) {}
 
   static Future<Dgf> open({
     required String dnsName, // dns name for what?
@@ -159,13 +153,18 @@ class Dgf extends ChangeNotifier {
       DeviceOrientation.portraitDown,
     ]);
     final dg = await Datagrove.open();
+    const storage = FlutterSecureStorage();
+    // value can be json with hexified byte arrays.
+    String? value = await storage.read(key: "default");
 
     final r = Dgf(
       server: dg,
-      dnsName: dnsName,
       style: style,
       identity: UserIdentity.empty(),
+      keychain: storage,
     );
+    r.isLogin = true;
+    value != null;
 
     //await r.speech.initSpeechState();
     return r;

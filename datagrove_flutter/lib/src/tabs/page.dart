@@ -75,7 +75,7 @@ class _PageScaffoldState extends State<PageScaffold> {
                 suffixIcon: Icon(CupertinoIcons.mic),
                 onSuffixTap: () {
                   final dg = Dgf.of(context);
-                  dg.speech.startListening();
+                  //dg.speech.startListening();
                 },
                 suffixMode: OverlayVisibilityMode.always,
                 onChanged: (e) {},

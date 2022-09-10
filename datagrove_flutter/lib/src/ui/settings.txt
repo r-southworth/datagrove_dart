@@ -8,7 +8,6 @@ import 'dart:typed_data';
 
 import '../client/datagrove_flutter.dart';
 import '../client/identity.dart';
-import '../ui/mobile_scanner.dart';
 import 'page.dart';
 
 const teacher = "🧑🏽‍🏫";

@@ -13,22 +13,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'datagrove_flutter.dart';
 import '../ui/mdown.dart';
-
-class OnboardDesktop extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final dg = Dgf.of(context);
-    final data = "";
-    //dg.identity.privateKey.publicKey.toHex();
-    return CustomScrollView(slivers: [
-      dg.style.desktopLink,
-      // SliverMarkdown(
-      //     text: introMessage, link: {"new": () {}}),
-      SliverQr(data),
-    ]);
-  }
-}
-
+/*
 class AddIdentity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -36,7 +21,7 @@ class AddIdentity extends StatelessWidget {
     final data = "";
     //dg.identity.privateKey.publicKey.toHex();
     return PageScaffold(title: Text('Link Phone'), slivers: [
-      dg.style.desktopLink,
+    
       // SliverMarkdown(
       //     text: introMessage, link: {"new": () {}}),
       SliverQr(data),
@@ -50,7 +35,7 @@ class AddIdentity extends StatelessWidget {
   }
 }
 
-/*
+
 CupertinoFormRow(
               prefix: label("Common Core"),
               child: CupertinoSwitch(
@@ -105,25 +90,6 @@ class SliverButton extends StatelessWidget {
 // this needs either statefullness to represent the possiblity of being offline
 // (in this case linking is not possible). We could potentially offer a
 // "paste private key" option; not great to encourage that though.
-
-class SliverQr extends StatelessWidget {
-  final String data;
-  const SliverQr(this.data, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-        child: Center(
-      child: Material(
-          color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: BarcodeWidget(
-                width: 200, height: 200, barcode: Barcode.qrCode(), data: data),
-          )),
-    ));
-  }
-}
 
 class SliverCopyButton extends StatelessWidget {
   String text;

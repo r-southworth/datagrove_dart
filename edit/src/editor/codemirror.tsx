@@ -115,7 +115,7 @@ type CodeMirrorProps = {
 
       var show = document.createElement("div")
       show.classList.add("cm-show") 
-      show.classList.add("mermaid")
+      
 
       var vjs : string
       const render = ()=>{

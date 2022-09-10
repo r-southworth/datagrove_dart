@@ -2,86 +2,25 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import '../client/datagrove_flutter.dart';
 import 'package:path/path.dart' as p;
+import 'package:bip39/bip39.dart' as bip39;
 
 import '../client/identity.dart';
 import 'notify.dart';
 import 'contact.dart';
 import 'nav.dart';
-import 'profile.dart';
 import 'starred.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-// base32 only uses 2-7, can we use 0 in clever way? issue is that whatever we do we need to explain why you can't use a url to user, and the less likely the trap, the more painful when they fall in.
-
-// urls look like host/{group-app-sponsor}/{publication id or query}?parameters
-// note is exactly one publication; to query more, we query on publication reference in that publication.
-
-// maybe this should cross to the isolate? it will be hard to keep cache
-// up to date here. could be laggy to contact isolate every time though.
-
-// resolving everything about the route may be
-class LoginScreen extends StatelessWidget {
-  Dgf dgf;
-  LoginScreen(this.dgf);
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: Center(
-            child: Container(
-                constraints: BoxConstraints(minWidth: 100, maxWidth: 400),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CupertinoFormSection.insetGrouped(children: [
-                        CupertinoTextFormFieldRow(
-                            autofocus: true,
-                            prefix: Text("User"),
-                            placeholder: "user"),
-                        CupertinoTextFormFieldRow(
-                          prefix: Text("Password"),
-                          placeholder: "password",
-                          obscureText: true,
-                        ),
-                        CupertinoFormRow(
-                          prefix: Text("Stay logged in"),
-                          child: CupertinoSwitch(
-                            onChanged: (bool value) {},
-                            value: true,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            CupertinoButton(
-                              child: Text("Sign in"),
-                              onPressed: () {
-                                dgf.isLogin = true;
-                                context.urlRouter.login("/");
-                              },
-                            ),
-                            CupertinoButton(
-                              child: Text("Sign up"),
-                              onPressed: () {
-                                dgf.isLogin = true;
-                                context.url = "/0";
-                              },
-                            ),
-                            CupertinoButton(
-                              child: Text("Link phone"),
-                              onPressed: () {
-                                dgf.isLogin = true;
-                                context.url = "/0";
-                              },
-                            )
-                          ],
-                        )
-                      ])
-                    ]))));
-  }
-}
+//                         CupertinoTextFormFieldRow(
+// autofocus: true,
+// prefix: Text("User"),
+// placeholder: "user"),
 
 class DgApp extends StatelessWidget {
   Dgf fl;
@@ -160,9 +99,6 @@ class TabScaffoldState extends State<TabScaffold> {
     final wide = MediaQuery.of(context).size.width > 700;
     final dg = Dgf.of(context);
     // this needs to change to a different list
-    if (dg.unlinked) {
-      return OnboardDesktop();
-    }
 
     return Material(
         child: Scaffold(

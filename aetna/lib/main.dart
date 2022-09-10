@@ -5,87 +5,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:pull_down_button/pull_down_button.dart';
+import 'package:badges/badges.dart';
 
-import 'cursor.dart';
+import 'shared/cursor.dart';
+import 'issue_new.dart';
+import 'issue.dart';
+import 'shared/search.dart';
+import 'priorities.dart';
+import 'settings.dart';
+import 'group.dart';
+import 'alerts.dart';
 
 void main() async {
   // at this point we know if we had already established a link
   final fl = await Dgf.open(
       dnsName: 'edit.datagrove.com',
       style: DgfStyle(
-        brandName: 'Aetna Claim Support',
+        brandName: 'Datagrove Issues',
       ));
 
   runApp(DgApp(fl: fl, router: makeRouter(fl)));
 }
 
-// the first two tabs
-class Tab extends StatefulWidget {
-  Widget title;
-  List<Widget> trailing;
-  int index;
-  Tab({required this.index, required this.title, required this.trailing});
-
-  @override
-  State<Tab> createState() => _TabState();
-}
-
-class _TabState extends State<Tab> {
-  List<Widget> cache = [];
-  final recentCursor =
-      CursorNotifier<String>(List<String>.generate(100, (e) => "$e"));
-  final folderCursor =
-      CursorNotifier<String>(List<String>.generate(100, (e) => "${e + 200}"));
-
-  @override
-  initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(Object context) {
-    switch (widget.index) {
-      // 0 is sorted by time.
-      // 1 is sorted by datum
-      case 0:
-        return CustomScrollView(slivers: [
-          CupertinoSliverNavigationBar(
-              largeTitle: widget.title,
-              trailing: Row(
-                  mainAxisSize: MainAxisSize.min, children: widget.trailing)),
-          SliverToBoxAdapter(
-              child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CupertinoSearchTextField(),
-          )),
-          Cursor<String>(
-              value: recentCursor,
-              builder: (BuildContext context, int index, String value) {
-                return CupertinoListTile(
-                    title: Text(value),
-                    onTap: () {
-                      // this needs to slide out all the tabs.
-                      context.urlRouter.url = "/0/$index";
-                    });
-              })
-        ]);
-      case 1:
-      // browse for a ticket, or search for one.
-      case 2:
-      // interesting statistics about tickets
-      case 3:
-      // profile
-
-    }
-    return Scaffold(
-        appBar: CupertinoNavigationBar(
-            leading: Container(),
-            middle: widget.title,
-            trailing:
-                Row(mainAxisSize: MainAxisSize.min, children: widget.trailing)),
-        body: Container());
-  }
-}
 // we need the tabset to be the bottom of of all the stacks.
 
 // the router needs to have a login
@@ -107,48 +50,41 @@ makeRouter(Dgf dgf) {
 
     // we need to pull out the tab - query parameters or path?
     var p = router.url.split("/");
-    var tab = p.length > 1 ? clamp(p[1], 0, 4) : 0;
+    var tab = p.length > 1 ? clamp(p[1], 0, 5) : 0;
 
     // we can add pages here
-    var menu1 = [
-      CupertinoButton(
-        onPressed: () {},
-        child: const Icon(CupertinoIcons.add),
-      ),
-      CupertinoButton(
-        onPressed: () {},
-        child: const Icon(CupertinoIcons.ellipsis),
-      )
-    ];
 
     // this gives us the base page
     List<CupertinoPage> r = [
       CupertinoPage(
           child: TabScaffold(initialTab: tab, children: [
         NavTab(
-            icon: const Icon(CupertinoIcons.clock),
-            label: 'Recent',
-            child: Tab(index: 0, title: const Text("Recent"), trailing: menu1)),
+            icon: const Icon(CupertinoIcons.doc),
+            label: 'Issues',
+            child: Issues()),
         NavTab(
-            icon: const Icon(CupertinoIcons.folder),
-            label: 'Browse',
-            child: Tab(index: 1, title: const Text("Browse"), trailing: menu1)),
+            icon: const Icon(CupertinoIcons.bell),
+            label: 'Alert',
+            child: Alerts()),
         NavTab(
-            icon: const Icon(CupertinoIcons.graph_circle),
-            label: 'Stats',
-            child: Tab(index: 2, title: const Text("Stats"), trailing: menu1)),
+            icon: const Icon(CupertinoIcons.star),
+            label: 'Star',
+            child: Priorities()),
+        NavTab(
+            icon: const Icon(CupertinoIcons.person),
+            label: 'Groups',
+            child: Groups()),
         NavTab(
             icon: const Icon(CupertinoIcons.gear),
             label: 'Settings',
-            child:
-                Tab(index: 3, title: const Text("Settings"), trailing: menu1))
+            child: Settings())
       ]))
     ];
     switch (tab) {
       case 0:
         // if there is another part, then we need to add a deeper level
         if (p.length > 2) {
-          r.add(CupertinoPage(child: TicketPage()));
+          r.add(CupertinoPage(child: IssuePage()));
         }
         break;
       case 1:
@@ -157,27 +93,10 @@ makeRouter(Dgf dgf) {
         break;
       case 3:
         break;
+      case 4:
+        break;
     }
 
     return r;
   });
-}
-
-class TicketPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    // this is mostly going to be a web page, it probably needs a fixed header
-    return Scaffold(
-        appBar: CupertinoNavigationBar(
-            middle: Text("Ticket #234"),
-            leading: CupertinoButton(
-              child: Icon(CupertinoIcons.left_chevron),
-              onPressed: () {
-                context.urlRouter.pop();
-              },
-            )),
-        body: SizedBox(
-            height: 400,
-            child: const WebView(initialUrl: 'https://www.datagrove.com')));
-  }
 }
