@@ -1,5 +1,4 @@
 // how can we know if we are root? find our route?
-import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
 import '../editor/editor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +100,7 @@ class _PageScaffoldState extends State<PageScaffold> {
               delegate: SliverChildBuilderDelegate(
                   childCount: 10,
                   (BuildContext context, int index) =>
-                      lt.CupertinoListTile(title: Text("$index"))))
+                      CupertinoListTile(title: Text("$index"))))
         ]))
       ]);
     }
@@ -169,7 +168,7 @@ class _ListSliver2State extends State<ListSliver2> {
   Widget build(BuildContext context) {
     return SliverAnimatedList(
         initialItemCount: 10,
-        itemBuilder: (c, i, a) => lt.CupertinoListTile(
+        itemBuilder: (c, i, a) => CupertinoListTile(
             onTap: () {
               Navigator.of(context).push(
                   CupertinoPageRoute(builder: (context) => EditorScreen()));
@@ -192,7 +191,7 @@ class _ListSliver2State extends State<ListSliver2> {
             title: Text("pinned $i")));
   }
 }
-
+/*
 class BackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -204,7 +203,7 @@ class BackButton extends StatelessWidget {
   }
 }
 
-/*
+
 class MessageList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

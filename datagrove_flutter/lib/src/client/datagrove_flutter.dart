@@ -15,10 +15,7 @@ export '../tabs/page.dart';
 export '../ui/date.dart';
 export '../ui/confirm.dart';
 export '../ui/mdown.dart';
-export '../ui/install.dart';
 export '../ui/dialog.dart';
-export '../ui/settings.dart';
-export 'router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -103,7 +100,7 @@ enum GroupAuth {
 typedef Suid = Uint8List; // varints
 
 // notifies on logout?
-class Dgf extends ChangeNotifier {
+class Dgf {
   Datagrove server;
   UserIdentity identity;
   List<UserIdentity> identities = [UserIdentity.empty()];

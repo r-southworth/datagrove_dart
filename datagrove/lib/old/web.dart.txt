@@ -1,0 +1,76 @@
+import 'package:flutter/cupertino.dart';
+import "package:webview_flutter_web/webview_flutter_web.dart";
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
+import 'dart:html' as html;
+import 'package:webview_flutter_web/webview_flutter_web.dart';
+
+void registerWeb() {
+  WebView.platform = WebWebViewPlatform();
+  //usePathUrlStrategy();
+}
+
+class Editor extends StatefulWidget {
+  @override
+  State<Editor> createState() => _EditorState();
+}
+
+class _EditorState extends State<Editor> {
+  @override
+  Widget build(BuildContext context) {
+    var host = html.window.location.host;
+    return WebView(
+      javascriptMode: JavascriptMode.unrestricted,
+      onWebViewCreated: (controller) {
+        controller.loadUrl('http://$host/assets/assets/index.html');
+      },
+    );
+  }
+}
+
+
+import 'shared/web_view.dart';
+
+// On a desktop this is a two pane browser with list icons in left and the list in the right. on a phone this needs to be a stack (or use navigator)
+
+class ListPane extends StatelessWidget {
+  final Completer<WebViewController> _controller =
+      Completer<WebViewController>();
+  @override
+  Widget build(BuildContext context) {
+    return WebView(
+      initialUrl: 'https://flutter.dev',
+      onWebViewCreated: (WebViewController controller) {
+        _controller.complete(controller);
+      },
+    );
+  }
+}
+
+class EditPane extends StatelessWidget {
+  final Completer<WebViewController> _controller =
+      Completer<WebViewController>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: WebView(
+        initialUrl: 'https://flutter.dev',
+        onWebViewCreated: (WebViewController controller) {
+          _controller.complete(controller);
+        },
+      ),
+    );
+  }
+}
+
+    if (false) {
+      return CupertinoApp(
+          home: CupertinoPageScaffold(
+              child: FlexScaffold(tool: [
+        LinkButton(
+            url: 'https://flutter.dev',
+            child: Icon(CupertinoIcons.square_list)),
+      ], child: Row(children: [ListPane(), EditPane()]))));
+    }

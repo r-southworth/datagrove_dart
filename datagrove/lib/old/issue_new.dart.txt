@@ -1,0 +1,195 @@
+// if the screen is wide enough, this should display the search as well.
+import 'package:datagrove_flutter/datagrove_flutter.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:cupertino_list_tile/cupertino_list_tile.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+import '../shared/taxonomy.dart';
+import '../shared/suggest.dart';
+
+class StartTicket extends StatefulWidget {
+  StartTicket();
+  @override
+  State<StartTicket> createState() => _StartTicketState();
+}
+
+class _StartTicketState extends State<StartTicket> {
+  late IssueHeader header;
+  IssueSchema? schema;
+  final to = SuggestionController();
+  @override
+  initState() {
+    super.initState();
+    header = IssueHeader(() {
+      setState(() {});
+    });
+    to.addListener(() {
+      setState(() {
+        schema = ToService.getSchema(to.text);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    to.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+        navigationBar: ModalNav(
+          title: const Text("Add Issue"),
+          valid: schema != null && schema!.valid(header),
+          action: const Text("Add"),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Column(children: [
+              CupertinoFormSection.insetGrouped(children: [
+                CupertinoTextFormFieldRow(
+                  autofocus: true,
+                  prefix: const Text("To"),
+                  controller: to,
+                ),
+                if (schema != null)
+                  for (final f in schema!.children) f.build(context, header)
+              ])
+            ]),
+          ),
+        ));
+  }
+}
+
+class ToService {
+  static final contacts = <String, IssueSchema>{
+    'claims@aetna.com': aetnaIssueSchema(),
+    'support@datagrove.com': IssueSchema(children: [])
+  };
+
+  static IssueSchema? getSchema(String id) {
+    return id == "claims@aetna.com" ? aetnaIssueSchema() : null;
+  }
+
+  static List<String> getSuggestions(String query) {
+    List<String> matches = <String>[];
+    matches.addAll(contacts.keys);
+
+    matches.retainWhere((s) => s.toLowerCase().contains(query.toLowerCase()));
+    return matches;
+  }
+}
+
+// general json
+class IssueHeader {
+  var item = <String, dynamic>{};
+  Function() update;
+  IssueHeader(this.update);
+}
+
+abstract class IssueField {
+  late IssueSchema schema;
+  String key;
+  bool required = false;
+  IssueField(this.key, {this.required = false});
+  Widget build(BuildContext context, IssueHeader header);
+
+  Widget get prefix => Text(schema.t(key));
+  String get placeholder => schema.t("$key-ph");
+
+  Widget row(Widget child) {
+    return CupertinoFormRow(prefix: Text(schema.t(key)), child: child);
+  }
+
+  String? getString(IssueHeader h) {
+    return h.item[key] as String?;
+  }
+
+  setString(IssueHeader h) {
+    return (String s) {
+      h.item[key] = s;
+      h.update();
+    };
+  }
+}
+
+class IssueText extends IssueField {
+  IssueText(super.key, {super.required = false});
+
+  @override
+  Widget build(BuildContext context, IssueHeader header) {
+    return CupertinoTextFormFieldRow(
+      prefix: prefix,
+      placeholder: placeholder,
+      initialValue: getString(header),
+      onChanged: setString(header),
+    );
+  }
+}
+
+class IssueTaxonomy extends IssueField {
+  StringTree children;
+  IssueTaxonomy(super.key, this.children, {super.required = false});
+
+  @override
+  Widget build(BuildContext context, IssueHeader header) {
+    var state = getString(header);
+    return CupertinoFormRow(
+        prefix: prefix,
+        child: CupertinoButton(
+            onPressed: () async {
+              var a = await TaxonomyPicker.pick(context, children);
+              if (a != null) {
+                setString(header)(a);
+              }
+            },
+            child: Text(state ?? "Tap to pick issue")));
+  }
+}
+
+String fallbackTranslation(String s, {dynamic options}) => s;
+
+class IssueSchema {
+  String Function(String, {dynamic options}) t = fallbackTranslation;
+
+  List<IssueField> children = [];
+
+  bool valid(IssueHeader h) {
+    for (final f in children) {
+      if (f.required && h.item[f.key] == null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  IssueSchema({required this.children, this.t = fallbackTranslation}) {
+    for (var o in children) {
+      o.schema = this;
+    }
+  }
+}
+
+IssueSchema aetnaIssueSchema() {
+  return IssueSchema(
+      t: (String s, {dynamic options}) {
+        return {
+              "type": "Issue",
+              "claimid": "Aetna Claim Id",
+              "altid": "Alternate Id",
+              "type-ph": "Tap to pick",
+              "claimid-ph": "id1, id2, ...",
+              "altid-ph": "id1, id2, ...",
+            }[s] ??
+            "";
+      },
+      children: [
+        IssueTaxonomy("type", StringTree.from(aetnaTypes)!, required: true),
+        IssueText("claimid", required: true),
+        IssueText("altid")
+      ]);
+}

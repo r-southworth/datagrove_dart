@@ -1,0 +1,103 @@
+
+// the basic list page will allow
+// 1. Categories
+// 2. Different sizes
+// 3. Bundles
+// create table (dirpath, category, bundlekey, size, url[],flags=live,avatar?)
+// choices: horizontally scroll like apple, but this seems awkward for a mouse
+// normal scroll, maybe with anchors like wikipedia.
+
+// the objective here is to filter an infinite list, but still allow staggered formatting
+// what about top-k search formulas?
+
+// create table (bundlekey, position, widget)
+// the overall sheet we can create by dragging things around.
+// reformatting is potentially slow.
+
+// can any accepted change just rebuild? do we need to respect keys for animation?
+class Runway extends ChangeNotifier {
+  int count = 0;
+  int height = 0;
+
+  // we need to be able to
+
+  // should we reuse the list widget to reduce gc?
+  List<Widget> build(BuildContext context, int start, int end) {
+    return [];
+  }
+}
+
+class RunwayController {
+  Runway runway;
+  Function() onchange;
+
+  // report how much the previous anchor moved.
+  int updateAnchor(int oldAnchor) {
+    return oldAnchor;
+  }
+
+  RunwayController({required this.onchange, required this.runway});
+}
+
+// reformatting
+
+// most of these will be folders, but we need a way to avatar a type of thing
+// as a default, then allow favicons where available.
+class ItemRegistry {
+  final builder = <String, Widget Function(BuildContext, String)>{};
+
+  Widget build(BuildContext context, String url) {
+    final u = Uri.parse(url);
+    final ext = p.extension(u.path);
+    final b = builder[ext];
+    return b == null ? Text(u.path) : b(context, url);
+  }
+}
+
+/*
+    switch (tab) {
+      case 0:
+        // if there is another part, then we need to add a deeper level
+        if (p.length > 2) {
+          r.add(CupertinoPage(child: IssuePage()));
+        }
+        break;
+      case 1:
+        break;
+      case 2:
+        break;
+      case 3:
+        break;
+      case 4:
+        break;
+    }
+
+TabScaffold(initialTab: tab, children: [
+        NavTab(
+            icon: const Icon(CupertinoIcons.square_list),
+            label: 'Lists',
+            //  child: Lists()
+            onPressed: (context) {}),
+        NavTab(
+            icon: Chip(
+              label: Text("99+"),
+              backgroundColor: CupertinoColors.activeBlue,
+            ),
+            label: 'Tabs',
+            onPressed: (context) {
+              context.url = "/1/0";
+            }),
+        NavTab(
+            icon: const Icon(CupertinoIcons.ellipsis),
+            label: 'Menu',
+            onPressed: (context) {
+              showCupertinoModalBottomSheet(
+                  useRootNavigator: true,
+                  isDismissible: true,
+                  builder: (BuildContext context) {
+                    return MainMenu();
+                  },
+                  context: context);
+            })
+      ])
+      */

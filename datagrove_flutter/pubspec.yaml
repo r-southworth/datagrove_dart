@@ -21,7 +21,7 @@ dependencies:
   # flutter, all platforms
   badges: ^2.0.3
   printing: ^5.9.1
-  cupertino_list_tile: ^0.2.1
+  #cupertino_list_tile: ^0.2.1
   provider: ^6.0.3
   flutter_svg: ^1.1.4
   file_picker: ^4.6.1

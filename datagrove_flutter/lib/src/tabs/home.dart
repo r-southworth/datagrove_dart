@@ -1,7 +1,6 @@
 // display a view, maybe editable
 import 'dart:typed_data';
 
-import 'package:cupertino_list_tile/cupertino_list_tile.dart' as lt;
 import 'package:flutter/cupertino.dart';
 import 'package:universal_html/html.dart' hide Text;
 import '../client/datagrove_flutter.dart';
@@ -91,7 +90,7 @@ class _HomeTabState extends State<HomeTab> {
               controller: controller,
               // this is the builder for RangeBuilder's animated list.
               builder: (c, DirectoryEntry d) {
-                return lt.CupertinoListTile(
+                return CupertinoListTile(
                   leading: style.folder,
                   trailing: CupertinoButton(
                     child: Icon(CupertinoIcons.ellipsis),
@@ -104,7 +103,6 @@ class _HomeTabState extends State<HomeTab> {
                       showCmd(context, fileMenu);
                     }
                   },
-                  onLongPress: () {},
                 );
               })
         ]);
