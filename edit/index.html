@@ -5,39 +5,17 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Markdown Editor</title>
-    <style>
-      .cell {
-        display: none;
-        cursor: default;
-        user-select: none;
-        border: 1px solid red;
-      }
-      #cellEditor {
-        cursor: default;
-        user-select: none;
-        border: 1px solid blue;
-        position: fixed;
-        z-index: 200;
-        transform: translate(300px,500px);
-      }
-      #tablePane {
-        display: none
-      }
-      #codePane {
-        display: none
-      }
-    </style>
   </head>
   <body >
-    <div id="tablePane" style="display: none">
+    <div id="root"></div>  
+    <script type="module" src="/src/main.tsx"></script>
+
+
+    <!-- <div id="tablePane" style="display: none">
       <div id="cellEditor" >editor</div>
     </div>
     <div id="scrollPane" style="display: none"></div>
-    <div id="codePane" style="display: none"></div>
-    <div id="root"></div>  
-
-    <script type="module" src="/src/main.tsx"></script>
-
+    <div id="codePane" style="display: none"></div> 
     <div id="templates" style="display: none">
       <div id="cell0" class='cell' style="position: fixed"></div>
       
@@ -62,7 +40,7 @@
           </div>
         </div>
       </li>
-    </div>
+    </div>-->
   
   </body>
 </html>

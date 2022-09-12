@@ -1,0 +1,6 @@
+import Editor from "./editor"
+import './App.css'
+//import { store } from "./store"
+import { dark } from './editor/styles/theme';
+
+

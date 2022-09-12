@@ -5,7 +5,7 @@ import { EditorState, Selection, Plugin } from "prosemirror-state";
 import { dropCursor } from "prosemirror-dropcursor";
 import { gapCursor } from "prosemirror-gapcursor";
 import { MarkdownParser, MarkdownSerializer } from "prosemirror-markdown";
-import { EditorView , NodeView} from "prosemirror-view";
+import { EditorView, NodeView } from "prosemirror-view";
 import { Schema, NodeSpec, MarkSpec, Slice } from "prosemirror-model";
 import { inputRules, InputRule } from "prosemirror-inputrules";
 import { keymap } from "prosemirror-keymap";
@@ -26,7 +26,7 @@ import Extension from "./lib/Extension";
 import ExtensionManager from "./lib/ExtensionManager";
 import ComponentView from "./lib/ComponentView";
 import headingToSlug from "./lib/headingToSlug";
-import {CodeBlockView} from "./codemirror"
+import { CodeBlockView } from "./codemirror"
 
 // styles
 import { StyledEditor } from "./styles/editor";
@@ -78,7 +78,6 @@ import SmartText from "./plugins/SmartText";
 import TrailingNode from "./plugins/TrailingNode";
 import PasteHandler from "./plugins/PasteHandler";
 import { PluginSimple } from "markdown-it";
-import { store } from "../store";
 export { schema, parser, serializer, renderToHtml } from "./server";
 
 export { default as Extension } from "./lib/Extension";
@@ -468,10 +467,10 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
           [extension.name]: nodeView,
         };
       }, {});
-      return {
-        ...o,
-        code_block: (node, view, getPos) => new CodeBlockView(node, view, getPos)
-      }
+    return {
+      ...o,
+      code_block: (node, view, getPos) => new CodeBlockView(node, view, getPos)
+    }
   }
 
   createCommands() {
@@ -535,11 +534,11 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
   }
 
   createDocument(content: string) {
-    let o =  this.parser.parse(content) || undefined
+    let o = this.parser.parse(content) || undefined
     let s = this.serializer.serialize(o)
     let s2 = o.toString()
 
-    console.log(`createDocument(${content}\n${s2}\n${s})`,  o)
+    console.log(`createDocument(${content}\n${s2}\n${s})`, o)
     return o
   }
 
@@ -564,7 +563,7 @@ class RichMarkdownEditor extends React.PureComponent<Props, State> {
     const view = new EditorView(this.element, {
       state: this.createState(this.props.value),
       editable: () => !this.props.readOnly,
-      nodeViews: this.nodeViews ,
+      nodeViews: this.nodeViews,
       handleDOMEvents: this.props.handleDOMEvents,
 
       dispatchTransaction: function (transaction) {

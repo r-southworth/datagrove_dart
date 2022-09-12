@@ -6,13 +6,15 @@ body {
   background-color: black;
   color: white;
 }
-.App{
+
+.App {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
 }
-#root{
+
+#root {
   position: fixed;
   left: 0;
   top: 0;
@@ -23,13 +25,16 @@ body {
   margin: 0;
   padding: 0;
 }
-[data-rmiz-ghost]{
+
+[data-rmiz-ghost] {
   display: none;
 }
+
 .ProseMirror {
   margin-left: 32px;
 
 }
+
 .editor {
   height: 100%;
   width: 100%;
@@ -38,11 +43,12 @@ body {
 
 }
 
-.editor > div {
+.editor>div {
   height: 100%;
   width: 100%;
   overflow: scroll;
 }
+
 .appBar {
   position: fixed;
   width: 100%;
@@ -64,15 +70,17 @@ body {
   background-color: black;
   color: white;
   padding: 4px;
-  
+
 }
+
 .chatEditor {
   width: 100%;
   margin: 2;
   padding: 0;
 
 }
-.chatEditor > div {
+
+.chatEditor>div {
   height: 100%;
   width: 100%;
   overflow: scroll;
@@ -134,6 +142,7 @@ body {
   min-width: 80px;
   margin: 0 5px;
 }
+
 .bubble {
   flex: 1;
   max-width: 450px;
@@ -263,11 +272,13 @@ width: 80%;
 .cm-wrapper {
   margin-left: -32px
 }
+
 .cm-show {
   text-align: right;
 
   padding: 14px
 }
+
 .cm-lang {
   text-align: center
 }
@@ -280,7 +291,32 @@ width: 80%;
   padding: 4px;
   text-align: center;
 }
+
 .app-wrap {
   overflow-y: auto;
   height: 100%;
+}
+
+.cell {
+  display: none;
+  cursor: default;
+  user-select: none;
+  border: 1px solid red;
+}
+
+#cellEditor {
+  cursor: default;
+  user-select: none;
+  border: 1px solid blue;
+  position: fixed;
+  z-index: 200;
+  transform: translate(300px, 500px);
+}
+
+#tablePane {
+  display: none
+}
+
+#codePane {
+  display: none
 }
