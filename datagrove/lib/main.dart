@@ -1,10 +1,12 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'shared.dart';
 import 'lists.dart';
-import 'shared/web.dart';
+import 'web/web.dart';
 import 'tabs.dart';
 
 import 'shared/install.dart';
@@ -13,6 +15,8 @@ import 'shared/settings.dart';
 
 import 'dart:js' as js;
 import 'dart:html';
+
+import 'web/webdiv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,6 +112,14 @@ class DgPage extends StatefulWidget {
 class _DgPageState extends State<DgPage> {
   bool showList = true;
   bool showEditor = true;
+  late DivController controller;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller = DivController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +161,7 @@ class _DgPageState extends State<DgPage> {
             Expanded(
                 child: Column(children: [
               EditNav(),
-              Expanded(child: WebDiv("<b>hello,world</b>2"))
+              Expanded(child: DivWeb(controller: controller))
             ]))
         ]));
   }
@@ -184,10 +196,8 @@ class EditNav extends StatelessWidget {
 }
 
 class SearchNav extends StatelessWidget {
-  const SearchNav({
-    super.key,
-    required this.theme,
-  });
+  bool hasBack = false;
+  SearchNav({super.key, required this.theme, this.hasBack = false});
 
   final CupertinoThemeData theme;
 
@@ -196,14 +206,16 @@ class SearchNav extends StatelessWidget {
     return Container(
         color: theme.barBackgroundColor,
         child: Row(children: [
-          CupertinoButton(
-            child: Icon(CupertinoIcons.left_chevron),
-            onPressed: () {},
-          ),
+          if (hasBack)
+            CupertinoButton(
+              child: Icon(CupertinoIcons.left_chevron),
+              onPressed: () {},
+            ),
           Expanded(
               child: Padding(
             padding: const EdgeInsets.all(4.0),
-            child: CupertinoSearchTextField(placeholder: "Search"),
+            child: CupertinoSearchTextField(
+                placeholder: "Search", autofocus: true),
           )),
           CupertinoButton(
             child: Icon(CupertinoIcons.add),

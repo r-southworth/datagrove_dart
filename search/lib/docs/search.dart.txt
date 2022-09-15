@@ -1,0 +1,151 @@
+
+
+// or just splits multiple searches; 
+// things like allintitle: apply to terms that come after in most cases
+// but could give up after one (site:), so some functions are fixed arity and some are variadic.
+// operators can combine - like -inurl
+// * is like a unary distance operator word1 * * word2
+// around(x) like jim around(10) hurd; how do you parse that?
+
+
+// prefix like #, @ need to put that into a fast field as an extra constraint
+// e.g. imoldfella finds @imoldfella but @imoldfella does not find imoldfella.
+// and is a noise word
+
+enum PhraseType {
+  quoted,
+  atprefix,
+  price,
+  rangePrice,
+  range,
+  not,
+}
+class Phrase {
+  final bool quoted;
+
+  final List<String> word;
+  const Phrase(this.quoted,this.word);
+}
+
+enum Operator {
+  or,
+
+}
+class Expression {
+  Operator op;
+  Expression left;
+  Expression right;
+}
+
+  // it's pretty normal to use ":" to note keywords like near, but we could
+  // just go with it and force "near" to find doctor near.
+
+  // this still doesn't work " near "
+  // https://support.google.com/websearch/answer/2466433?hl=en
+
+
+// how do you phrase queries for langauges without  spaces?
+class Localize {
+  final String near = " near ";
+  const Localize();
+}
+
+enum State {
+  normal,
+  phraseWord,
+}
+
+bool isPunctuation(String c) {
+  return " :,;'".contains(c);
+}
+class ParsedQuery {
+  List<Phrase> search=[];
+   List<Phrase> near=[];
+
+  ParsedQuery(String query,{Localize locale = const Localize()}) {
+    query = query.toLowerCase();
+
+    State state = State.normal;
+
+    String word = "";
+    Phrase phrase = Phrase(false,[]);
+
+    append() {
+      // should we go ahead and stem here?
+      if (word.isNotEmpty) {
+        phrase.word.add(word);
+        word = "";
+      }
+    }   
+    emit() {
+      append();
+      if (phrase.word.isNotEmpty)
+        search.add(phrase);
+    }
+
+    for (var i=0; i<query.length; i++){
+      final c = query[i];
+      if (isPunctuation(c)){
+        append();
+        continue;
+      }
+      // simple state machine where we switch from in quotes to not.
+      // could use bool, but we might do more complex things later and this seems clearer.
+      switch (state) {
+        case State.normal:
+          if (query[i]=="\""){
+           emit();
+           phrase=Phrase(true,[]);
+           state = State.phraseWord;
+        }
+        break;
+        case State.phraseWord:
+          if (query[i]=="\""){
+           emit();
+           phrase=Phrase(false,[]);
+           state = State.phraseWord;
+          }
+      }
+
+    }
+
+    for (var i=0; i<search.length; i++) {
+      if (!search[i].quoted && search[i].word[0]=="near"){
+          near = search.sublist(i+1);
+          search = search.sublist(0,i);
+          break;
+      }
+    }
+  }
+}
+
+
+
+    
+
+    var location: string[] = ["me"]
+    var npi: number|null = null
+    const words = query.split(" ")
+    for (let v=0; v<words.length; v++) {
+        if (words[v]=="near") {
+            location = words.slice(v+1)
+        } else if (words[v].length==10) {
+            let x = parseInt(words[v])
+            if (x >= 1000000000 && x <= 9999999999){
+                // check the digit
+                let base = x / 10
+                let cd = x % 10
+                if (true) {
+                    npi = x
+                }
+            }
+        }
+    }
+
+}
+
+
+}
+
+
+
