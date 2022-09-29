@@ -8,6 +8,16 @@
   </head>
   <body >
     <div id="root"></div>  
-    <script type="module" src="/src/test.tsx"></script>
+    <script type="module" src="/src/test.ts"></script>
+    <!-- <script type="module" defer>
+      import {prosemirror} from '/src/test.ts'
+      function mountEditor(id) {
+        prosemirror(id)
+      }
+      window.mountEditor = mountEditor
+      mountEditor('root')
+      console.log("loaded ", window.mountEditor)
+      mount d
+    </script> -->
   </body>
 </html>

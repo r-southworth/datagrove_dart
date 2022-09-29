@@ -1,5 +1,5 @@
 import React from "react";
-import { findParentNode } from "prosemirror-utils";
+import { findParentNode } from "editor/pmutil";
 import CommandMenu, { Props } from "./CommandMenu";
 import BlockMenuItem from "./BlockMenuItem";
 import getMenuItems from "../menus/block";

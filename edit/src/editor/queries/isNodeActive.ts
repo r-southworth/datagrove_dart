@@ -1,4 +1,4 @@
-import { findParentNode, findSelectedNodeOfType } from "prosemirror-utils";
+import { findParentNode, findSelectedNodeOfType } from "editor/pmutil";
 
 const isNodeActive = (type, attrs: Record<string, any> = {}) => state => {
   if (!type) {

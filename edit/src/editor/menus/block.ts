@@ -18,7 +18,7 @@ import {
   MathIcon,
 
  
-} from "outline-icons";
+} from "../icons";
 import { ChartBarSquareIcon, PresentationChartBarIcon } from '@heroicons/react/24/solid'
 import { MenuItem } from "../types";
 import baseDictionary from "../dictionary";

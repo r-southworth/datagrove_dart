@@ -1,5 +1,5 @@
 import { EditorState, TextSelection } from "prosemirror-state";
-import { findBlockNodes } from "prosemirror-utils";
+import { findBlockNodes } from "editor/pmutil";
 import { NodeType } from "prosemirror-model";
 import findCollapsedNodes from "../queries/findCollapsedNodes";
 

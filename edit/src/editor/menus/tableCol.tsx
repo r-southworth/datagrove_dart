@@ -5,7 +5,7 @@ import {
   AlignCenterIcon,
   InsertLeftIcon,
   InsertRightIcon,
-} from "outline-icons";
+} from "../icons";
 import { EditorState } from "prosemirror-state";
 import isNodeActive from "../queries/isNodeActive";
 import { MenuItem } from "../types";

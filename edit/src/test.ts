@@ -98,9 +98,13 @@ encoding:
 - three
 `
 
+function prosemirror (element: HTMLElement)  {
+  mountEditor(element, v, (x) => {
+    console.log(x)
+  })
+}
+globalThis.prosemirror = prosemirror;
 
-
-    mountEditor('root', v, (x) => {
-      console.log(x)
-    })
-
+if (document.getElementById('root')){
+  prosemirror(document.getElementById('root'));
+}

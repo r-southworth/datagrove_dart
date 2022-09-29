@@ -5,7 +5,7 @@ import {
   AlignImageLeftIcon,
   AlignImageRightIcon,
   AlignImageCenterIcon,
-} from "outline-icons";
+} from "../icons";
 import isNodeActive from "../queries/isNodeActive";
 import { MenuItem } from "../types";
 import baseDictionary from "../dictionary";

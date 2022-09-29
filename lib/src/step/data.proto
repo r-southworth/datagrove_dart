@@ -1,0 +1,64 @@
+syntax = "proto3";
+package tutorial;
+
+//import "google/protobuf/timestamp.proto";
+message Style {
+    int32 id = 1; 
+}
+
+message Sequence {
+    repeated int64 = 1
+    int64 next = 2
+}
+// delete[start,end), then insert before start count new ids.
+message SequenceStep {
+    int32 start = 1
+    int32 end = 2
+    int32 count = 3
+}
+
+enum GridStepOp {
+    dim = 0;
+    style = 1;
+    cell = -1;
+}
+
+message Grid {
+    repeated Dim dim = 1;
+    repeated GridStep local = 2;
+}
+message Dim {
+    repeated Style style =  1;
+}
+
+message GridStep {
+    oneof op {
+        message dim {
+            repeated int32 data = 1;
+        }
+    }
+}
+// cells are stored seperately with a key of {group.fork}/docid/row/cell/block
+// we need row oriented for variable height formatting
+// 
+message CellStep {
+    oneof op {
+        Style style = 1;
+        bytes data = 2;
+    }
+}
+
+message MarkdownStep {
+    
+}
+  
+/*
+message GridStep {
+  GridStepOp op;
+  
+  oneof {
+    DimStep dimStep = 1;
+    CellStep cellStep = 2;
+    StyleStep styleStep = 3;
+  }
+}*/

@@ -11,7 +11,7 @@ import {
   TodoListIcon,
   InputIcon,
   HighlightIcon,
-} from "outline-icons";
+} from "../icons";
 import { isInTable } from "prosemirror-tables";
 import { EditorState } from "prosemirror-state";
 import isInList from "../queries/isInList";

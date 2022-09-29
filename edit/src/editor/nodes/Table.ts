@@ -20,7 +20,7 @@ import {
   createTable,
   getCellsInColumn,
   moveRow,
-} from "prosemirror-utils";
+} from "editor/pmutil";
 import { Plugin, TextSelection } from "prosemirror-state";
 import tablesRule from "../rules/tables";
 

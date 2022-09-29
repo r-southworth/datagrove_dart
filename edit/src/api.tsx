@@ -27,8 +27,7 @@ class Tx {
 
 }
 type UpdateEditor = (x: Tx) => void
-export function mountEditor(id: string, md: string, onchange: (x: Tx) => void): UpdateEditor {
-  const rootElement = document.getElementById(id);
+export function mountEditor(rootElement: HTMLElement, md: string, onchange: (x: Tx) => void): UpdateEditor {
   const root = createRoot(rootElement);
   root.render(
     <StrictMode>

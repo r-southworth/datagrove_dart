@@ -1,5 +1,5 @@
 import * as React from "react";
-import { setTextSelection } from "prosemirror-utils";
+import { setTextSelection } from "editor/pmutil";
 import { EditorView } from "prosemirror-view";
 import { Mark } from "prosemirror-model";
 import {
@@ -8,7 +8,7 @@ import {
   PlusIcon,
   TrashIcon,
   OpenIcon,
-} from "outline-icons";
+} from "../icons";
 import styled, { withTheme } from "styled-components";
 import isUrl from "../lib/isUrl";
 import theme from "../styles/theme";

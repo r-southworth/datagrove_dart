@@ -10,7 +10,7 @@ import {
   TextSelection,
 } from "prosemirror-state";
 import { DecorationSet, Decoration } from "prosemirror-view";
-import { findParentNodeClosestToPos } from "prosemirror-utils";
+import { findParentNodeClosestToPos } from "editor/pmutil";
 
 import Node from "./Node";
 import isList from "../queries/isList";

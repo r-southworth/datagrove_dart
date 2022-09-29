@@ -1,0 +1,219 @@
+import 'dart:typed_data';
+
+import 'package:flutter/cupertino.dart';
+import 'dart:html' as html;
+import 'web.dart';
+import 'dart:ui' as ui;
+import 'dart:collection';
+import './db.dart';
+
+import 'webrender.dart';
+
+class Editor extends StatefulWidget {
+  final Document doc;
+  const Editor(this.doc, {super.key});
+
+  @override
+  State<Editor> createState() => _EditorState();
+}
+
+class _EditorState extends State<Editor> {
+  int step = 0; // not sure I need this,
+  final render = WebRender();
+
+  @override
+  void initState() {
+    // listen to changes from webview
+    render.addListener(() {
+      // look at how the render is scrolled and maybe change the cached models
+      // we need to translate events into ux events and steps into database updates
+      // then the database will update and force an update to the screen?
+      // we need a sample like the code mirror with two linked views.
+      // note with our webcanvas these could be two cells in the same canvas
+      //
+      render.event;
+    });
+
+    _listen();
+
+    super.initState();
+  }
+
+  void _listen() {
+    // the url here references a graph (dag?) that could be updated because a child updated.
+    // listen to changes from the database
+
+    // create an initial web render and set it into the webview.
+    WebRenderValue v = WebRenderValue();
+    render.target.reset(v);
+
+    widget.doc.addListener(() {
+      // the document step history has extended. create a new webrenderview from the steps, then set it into render target.
+      WebRenderValue v = render.target;
+
+      render.target = v;
+    });
+  }
+
+  // we need
+  @override
+  void didUpdateWidget(covariant Editor oldWidget) {
+    // we only care if the database or url changed
+    if (widget.doc != widget.doc) {
+      // reset the webrender to the new document.
+      oldWidget.doc.removeListener(_listen);
+      _listen();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // the main thing to do is communicated to WebRender layout changes.
+    return Container();
+  }
+}
+
+enum ScrollLock { vertical, horizontal, both }
+
+// each web scroll div can have a pm model in it that we need to apply steps to
+// these steps can in some cases be dropped, and this then needs to be updated back to storage. oof.
+
+// represents a prosemirror document. the document is managed by javascript.
+
+// the scroller contains a grid of pmdocs.
+class WebScrollState {
+  // controlls the size of the canvas being scrolled
+  int height = 0;
+  int width = 0; // should match the viewport to eliminate horizontal scroll
+  int zoom = 0;
+
+  // this is intended to be enough divs to cover the view port.
+  // the
+
+  // Last resort way to cover space; we can keep enough of these around that
+  // we only need to assign them to a location.
+  // grids
+}
+
+// maybe this should be a single tree of cells with x,y or wrapped coordinates?
+// x,y would remove issues from adding columns? we still need
+// can the cell itself be the key? aba problem?
+
+// it could help to merge steps since javascript is in another thread potentially.
+// we would need to javascript to reply.
+//
+
+// we need to get a row of documents at a time so we can lay them out?
+// should there a be a direction such that this is a column though?
+
+// this has to be an InAppWebView or a div for flutter web.
+
+// here our webtx should respect the database transactions and update atomically
+// Each update extends the history of some cell.
+// transactions are assumed small, so iterate over the transaction and hash-join
+// to the state of the scroll state.
+class WebTx {
+  Map<String, StepHistory> cell;
+  WebTx(this.cell);
+}
+
+// values reference snapshots. cells represent a series of values.
+class DbValue<T> {
+  T? value; // null here is tombstone. If T might have its own null state.
+}
+
+class DivProperties {
+  int id = 0;
+  String toJson() {
+    return "{}";
+  }
+}
+
+class DivEvent {
+  int id = 0;
+}
+
+// we need timeline
+// we need a way to communicate prosemirror steps
+// it's not clear with dragging if we want to round trip to dart.
+
+// state without view, only intended for one reader, one writer
+// manages a state stream? that seems dumb. dart streams have broadcasters
+// should we use those?
+
+// we need timeline
+// we need a way to communicate prosemirror steps
+// it's not clear with dragging if we want to round trip to dart.
+class WebScroll {
+  final div = List<DivProperties>.filled(10000, DivProperties());
+  final dartUpdated = <int>{};
+  final webUpdated = <int>{};
+
+  final fromWeb = ChangeNotifier();
+  final fromDart = ChangeNotifier();
+
+  updateFromDart(List<DivProperties> prop) {}
+  updateFromWeb(List<DivEvent> event) {}
+
+  String jsonToWeb() {
+    return "";
+  }
+}
+
+// the main activity here is updating the web, but is differencing the best approach?
+// we could remember the steps instead? raph says diffing is less mental load
+class DivWeb extends StatefulWidget {
+  WebScrollController controller;
+  DivWeb({required this.controller});
+
+  @override
+  State<DivWeb> createState() => _DivWebState();
+}
+
+var text =
+    """Parses the HTML fragment and sets it as the contents of this element. This ensures that the generated content follows the sanitization rules specified by the validator or treeSanitizer.
+
+If the default validation behavior is too restrictive then a new NodeValidator should be created, either extending or wrapping a default validator and overriding the validation APIs.""";
+
+class _DivWebState extends State<DivWeb> {
+  late html.DivElement div;
+  late String viewType;
+  static int counter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ignore: undefined_prefixed_name
+    ui.platformViewRegistry.registerViewFactory(viewType, (_) {
+      return div;
+    });
+  }
+
+  buildDiv() {}
+
+  @override
+  Widget build(BuildContext context) {
+    // how is this participating in Flutter's layout? We probably need this to look like a scroller for layout even though it needs to let the web controll scroll directly. get size from build context?
+    //Size? viewport = context.size;
+
+    return HtmlElementView(viewType: viewType);
+  }
+}
+
+/*
+    var b = StringBuffer();
+    for (int i = 0; i < 2; i++) {
+      b.write(
+          "<div content-editable style='position: fixed; transform: translate(0px,${i * 32}px)' id='c$i'  >$text</div>");
+    }
+
+    div = html.DivElement()
+      ..style.width = '100%'
+      ..style.height = '100%'
+      ..setInnerHtml(b.toString(),
+          treeSanitizer: html.NodeTreeSanitizer.trusted);
+    viewType = "DivWeb-${counter++}";
+
+*/
