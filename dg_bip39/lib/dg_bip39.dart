@@ -17,7 +17,8 @@ final _storage = const FlutterSecureStorage();
 
 class Login extends StatelessWidget {
   Widget child;
-  Login({required this.child, super.key});
+  String appname;
+  Login({required this.child, super.key, this.appname = "this app"});
 
   @override
   Widget build(BuildContext context) {
@@ -94,18 +95,50 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                   child: const Icon(CupertinoIcons.eye)),
                             ]),
-                            Row(
-                              children: [
-                                Expanded(child: Text("Login with phone")),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: BarcodeWidget(
-                                      width: 200,
-                                      height: 200,
-                                      barcode: Barcode.qrCode(),
-                                      data: data),
-                                ),
-                              ],
+                            CupertinoFormRow(
+                              prefix: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  const Text("Login with Phone"),
+                                  SizedBox(
+                                    width: 300,
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 8.0),
+                                      child: Text(
+                                        "Scan QR code with this app on your phone to log in instantly",
+                                        style: TextStyle(
+                                            color: CupertinoColors.systemGrey),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(child: Container()),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color: CupertinoColors.white,
+                                          border: Border.all(
+                                            color: CupertinoColors.white,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(20))),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: BarcodeWidget(
+                                            width: 200,
+                                            height: 200,
+                                            barcode: Barcode.qrCode(),
+                                            data: data),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                             AddAccount()
                           ])
@@ -119,12 +152,6 @@ class AddAccount extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: Container()),
-        CupertinoButton(
-          child: const Text(" phone"),
-          onPressed: () async {
-            await showModal(context, ShowQr());
-          },
-        ),
         CupertinoButton(
           child: const Text("Create account"),
           onPressed: () async {
@@ -272,15 +299,18 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: CupertinoColors.activeGreen)),
                     ),
                     const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(advice),
-                    )
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          advice,
+                          style: TextStyle(color: CupertinoColors.white),
+                        ))
                   ]),
 
                   Row(children: [
                     Expanded(
                         child: CupertinoTextFormFieldRow(
                             prefix: const Text("Name"),
+                            autofocus: true,
                             placeholder: "Choose a name")),
                     CupertinoButton(
                         onPressed: () {
