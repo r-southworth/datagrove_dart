@@ -1,0 +1,63 @@
+
+/*
+IMPORTANT: Nothing in this file should be considered secret. Don't put in any passwords or anything like that. This is purely to define the parameters of your plan.
+
+you can define as many plans as you want. Your members can pick a plan or import their own plan data. They can import their private plan date (deductible, private )
+
+A "root" is a PC you entrust to authorize users and provide authorized users with their personal information. you may not want a root! see this blog post for why you may not want or need a root. Leave the root fields empty unless you are building your own root. 
+
+If you want a custom root we can build a custom root for you; contact sales@datagrove.com. To get started building your own fork github.com/datagrove/root. Our root template requires a willingness to learn flutter and javascript.
+
+If you are really a glutton for punishment see github.com/datagrove/ediroot. This is a root that can work with your existing HIPAA 837/835 server to price claims with an existing adjudicator.
+
+*/
+
+{
+  name: "Some trust fund",
+  logo: "a link to your logo",
+  identity: "<Your Public Key here>",
+  contact: "a link to your web site or an email",
+  root: {
+    email: "allowed",
+    phone: "allowed",
+    secret: "allowed"
+  },
+  plans: {
+    hmo1: {
+      effective: "2023-01-01",
+      terminate: "2024-01-01",
+      contracts: [
+        // add links to your uploaded contracts here
+        // contracts have two csv files: codes= code, price, provider_group 
+        // and providers = provider_group, npi
+        // codes may have modifiers and look like cpt:55002:01
+        // location may be used as a modifier as *80
+        "sampleContract/<hashcode here>"
+      ],
+      // ucr (usual, customary, reasonable) follows the same format as contracts
+      ucr: [
+        "",
+        "",
+      ],
+      custom: "", // link your javascript code. Note that the origin for this is yourfund.datagrove.com, so plan accordingly.
+
+      standard: {
+        network: {
+          family: {
+            coinsurance: 0,
+            copay: null,
+            deductible: null,
+            pocket: null
+          },
+          life: {
+            copay: null,
+            deductible: null,
+            pocket: null
+          }
+        },
+        out_of_network: null,
+        combined: null
+      }
+    }
+  }
+}
