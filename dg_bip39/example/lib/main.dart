@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     final a = Provider.of<User>(context);
     return CupertinoPageScaffold(
       child: Center(
-        child: Text("Hi ${a.name}!",
+        child: Text("Hi ${a.active!.name}!",
             style: TextStyle(color: CupertinoColors.white)),
       ),
     );
