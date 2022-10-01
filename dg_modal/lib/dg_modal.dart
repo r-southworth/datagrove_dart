@@ -19,10 +19,7 @@ class ModalScaffold extends StatelessWidget {
           valid: valid,
           action: action,
         ),
-        child: SafeArea(
-            child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: child)));
+        child: child);
   }
 }
 

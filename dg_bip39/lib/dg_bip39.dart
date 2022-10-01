@@ -1,4 +1,9 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+
 library dg_bip39;
+
+import 'dart:convert';
+import 'dart:math';
 
 import 'package:dg_modal/dg_modal.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,12 +13,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:barcode_widget/barcode_widget.dart';
+import 'package:convert/convert.dart';
+import 'package:ecdsa/ecdsa.dart';
+import 'package:elliptic/elliptic.dart';
+part 'identity.dart';
+
+// making signup a modal allows it to be called from anywhere, e.g. a settings page.
+showAddIdentity(BuildContext context) async {
+  await showModal(context, LoginScreen());
+}
 
 // move to localization
 const String advice =
-    """Write it down! Keep it safe. NO ONE at Datagrove can retrieve a lost passphrase for you. Access to your private data could be lost if you lose this!!!!\n\nAlso, anyone that knows these words can impersonate you and steal your secrets. When you tap "I wrote it down", this identity will be forgotten unless you write it down. With this secret identity you can log in from any device, but you should only log in on devices that you trust.""";
-
-final _storage = const FlutterSecureStorage();
+    """With this secret identity you can recover your data even if you lose your device. We suggest you write it down with pencil on paper.\n\nNO ONE at Datagrove can retrieve a lost passphrase for you!!""";
 
 class Login extends StatelessWidget {
   Widget child;
@@ -22,7 +34,7 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Provider(
+    return ChangeNotifierProvider(
         create: (_) => IdentityManager.value, child: LoginMaybe(child: child));
   }
 }
@@ -34,10 +46,12 @@ class LoginMaybe extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dg = Provider.of<IdentityManager>(context);
-    if (dg.identity.isNotEmpty) {
+    if (dg.active != null) {
       return child;
-    } else {
+    } else if (dg.identity.isEmpty) {
       return LoginScreen();
+    } else {
+      return Text("not implemented");
     }
   }
 }
@@ -56,93 +70,90 @@ class _LoginScreenState extends State<LoginScreen> {
   bool store = true;
   @override
   Widget build(BuildContext context) {
-    final data = "data";
+    final im = Provider.of<IdentityManager>(context);
+    final data = secureString(16);
     return CupertinoPageScaffold(
-        child: Center(
+        backgroundColor: CupertinoColors.extraLightBackgroundGray,
+        navigationBar: CupertinoNavigationBar(middle: Text("Login")),
+        child: SafeArea(
+          child: SingleChildScrollView(
             child: Container(
                 constraints: const BoxConstraints(minWidth: 100, maxWidth: 600),
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      CupertinoFormSection.insetGrouped(
-                          header: const Text("Authorize this device"),
-                          children: [
-                            Row(children: [
-                              Expanded(
-                                  child: CupertinoTextFormFieldRow(
-                                prefix: const Text("Password"),
-                                autofocus: true,
-                                placeholder: "BIP39 passphrase",
-                                inputFormatters: [
-                                  LengthLimitingTextInputFormatter(1024)
-                                ],
-                                onChanged: (String s) {
-                                  if (bip39.validateMnemonic(s)) {
-                                    // widget.dgf.isLogin = true;
-                                    // context.url = "/0?";
-                                  } else {
-                                    print("nope");
-                                  }
-                                },
-                                obscureText: obscure,
-                              )),
-                              CupertinoButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      obscure = !obscure;
-                                    });
-                                  },
-                                  child: const Icon(CupertinoIcons.eye)),
-                            ]),
-                            CupertinoFormRow(
-                              prefix: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  const Text("Login with Phone"),
-                                  SizedBox(
-                                    width: 300,
-                                    child: Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 8.0),
-                                      child: Text(
-                                        "Scan QR code with this app on your phone to log in instantly",
-                                        style: TextStyle(
-                                            color: CupertinoColors.systemGrey),
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(child: Container()),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          color: CupertinoColors.white,
-                                          border: Border.all(
-                                            color: CupertinoColors.white,
-                                          ),
-                                          borderRadius: const BorderRadius.all(
-                                              Radius.circular(20))),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: BarcodeWidget(
-                                            width: 200,
-                                            height: 200,
-                                            barcode: Barcode.qrCode(),
-                                            data: data),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            AddAccount()
-                          ])
-                    ]))));
+                      CupertinoButton(
+                        child: const Text("Create account"),
+                        onPressed: () async {
+                          // dgf.isLogin = true;
+                          // context.url = "/0";
+                          await showModal(context, SignupScreen());
+                        },
+                      ),
+                      Qr(data: data),
+                      Text("Login with Phone"),
+                      SizedBox(
+                        width: 300,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            "Scan QR code with this app on your phone to log in instantly",
+                            style: TextStyle(color: CupertinoColors.systemGrey),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("BIP 39 passphrase"),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CupertinoTextField(
+                          textAlign: TextAlign.left,
+                          maxLines: 3,
+                          placeholder: "BIP39 passphrase",
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(1024)
+                          ],
+                          onChanged: (String s) {
+                            if (bip39.validateMnemonic(s)) {
+                              // widget.dgf.isLogin =rue;
+                              // context.url = "/0?";
+                              im.activate(Identity.create());
+                            } else {
+                              print("nope $s");
+                            }
+                          },
+                        ),
+                      ),
+                    ])),
+          ),
+        ));
+  }
+}
+
+class Qr extends StatelessWidget {
+  final String data;
+  const Qr({super.key, required this.data});
+  @override
+  Widget build(Object context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+            color: CupertinoColors.white,
+            border: Border.all(
+              color: CupertinoColors.white,
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(20))),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: BarcodeWidget(
+              width: 200, height: 200, barcode: Barcode.qrCode(), data: data),
+        ),
+      ),
+    );
   }
 }
 
@@ -242,25 +253,6 @@ class Linkup extends StatelessWidget {
   }
 }
 
-class Identity {}
-
-class IdentityManager {
-  static IdentityManager value = IdentityManager();
-
-  String name = "";
-  List<Identity> identity = [];
-  Identity active = Identity();
-
-  static Future<IdentityManager> open() async {
-    final r = IdentityManager();
-
-    return r;
-  }
-
-  activate(Identity) async {}
-  add(BuildContext context) {}
-}
-
 class SignupScreen extends StatefulWidget {
   var mnemonic = bip39.generateMnemonic();
   @override
@@ -269,6 +261,12 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   bool valid = false;
+
+  @override
+  initState() {
+    super.initState();
+    print("is ${widget.mnemonic} ${bip39.validateMnemonic(widget.mnemonic)}");
+  }
 
   checkName() {
     setState(() {
@@ -279,59 +277,51 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return ModalScaffold(
-        action: const Text("I wrote it down"),
+        //action: const Text("I wrote it down"),
         title: const Text("Create Account"),
         valid: valid,
         child: Center(
             child: Container(
                 constraints: const BoxConstraints(minWidth: 100, maxWidth: 600),
-                child: CupertinoFormSection.insetGrouped(children: [
-                  Column(children: [
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text("Your identity is",
-                          style: TextStyle(fontSize: 18)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SelectableText(widget.mnemonic,
-                          style: const TextStyle(
-                              color: CupertinoColors.activeGreen)),
-                    ),
-                    const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          advice,
-                          style: TextStyle(color: CupertinoColors.white),
-                        ))
-                  ]),
-
-                  Row(children: [
-                    Expanded(
-                        child: CupertinoTextFormFieldRow(
-                            prefix: const Text("Name"),
-                            autofocus: true,
-                            placeholder: "Choose a name")),
-                    CupertinoButton(
-                        onPressed: () {
-                          checkName();
-                        },
-                        child: const Text("Check"))
-                  ]),
-                  // CupertinoFormRow(
-                  //     prefix: Text("Name"),
-                  //     child: Row(children: [
-                  //       Expanded(
-                  //           child: CupertinoTextField(
-                  //               placeholder: "Choose a name")),
-                  //       CupertinoButton(onPressed: () {}, child: Text("Check"))
-                  //     ])),
-                  if (valid)
-                    CupertinoButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text("I wrote it down"))
-                ]))));
+                child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    child: Column(children: [
+                      Row(children: [
+                        Expanded(
+                            child: CupertinoTextFormFieldRow(
+                                prefix: const Text("Name"),
+                                autofocus: true,
+                                placeholder: "Screen name")),
+                        CupertinoButton(
+                            onPressed: () {
+                              checkName();
+                            },
+                            child: const Text("Check"))
+                      ]),
+                      // put name here
+                      if (valid)
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text("Your identity is",
+                              style: TextStyle(fontSize: 18)),
+                        ),
+                      if (valid)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SelectableText(widget.mnemonic,
+                              style: const TextStyle(
+                                  color: CupertinoColors.activeGreen)),
+                        ),
+                      if (valid)
+                        const Padding(
+                            padding: EdgeInsets.all(8.0), child: Text(advice)),
+                      if (valid)
+                        CupertinoButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("I wrote it down"))
+                    ])))));
   }
 }
