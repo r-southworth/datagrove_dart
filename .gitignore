@@ -11,3 +11,4 @@ pubspec.lock
 MLKitBarcodeScanning
 .DS_store
 .DS_Store
+node_modules
