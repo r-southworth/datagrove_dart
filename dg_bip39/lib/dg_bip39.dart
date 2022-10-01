@@ -39,15 +39,21 @@ class Login extends StatelessWidget {
   }
 }
 
-class LoginMaybe extends StatelessWidget {
+class LoginMaybe extends StatefulWidget {
   Widget child;
   LoginMaybe({required this.child, super.key});
 
   @override
+  State<LoginMaybe> createState() => _LoginMaybeState();
+}
+
+class _LoginMaybeState extends State<LoginMaybe> {
+  @override
   Widget build(BuildContext context) {
+    //return widget.child;
     final dg = Provider.of<IdentityManager>(context);
     if (dg.active != null) {
-      return child;
+      return widget.child;
     } else if (dg.identity.isEmpty) {
       return LoginScreen();
     } else {
@@ -68,8 +74,82 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool obscure = true;
   bool store = true;
+  bool signup = false;
+  late TextEditingController controller;
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController();
+  }
+
+  var mnemonic = bip39.generateMnemonic();
+
+  bool valid = false;
+
+  checkName() {
+    setState(() {
+      valid = true;
+    });
+  }
+
+  Widget buildSignup(BuildContext context) {
+    final pr = Provider.of<IdentityManager>(context);
+    return ModalScaffold(
+        //action: const Text("I wrote it down"),
+        title: const Text("Create Account"),
+        valid: valid,
+        child: Center(
+            child: Container(
+                constraints: const BoxConstraints(minWidth: 100, maxWidth: 600),
+                child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    child: Column(children: [
+                      Row(children: [
+                        Expanded(
+                            child: CupertinoTextFormFieldRow(
+                                controller: controller,
+                                prefix: const Text("Name"),
+                                autofocus: true,
+                                placeholder: "Screen name")),
+                        CupertinoButton(
+                            onPressed: () {
+                              checkName();
+                            },
+                            child: const Text("Check"))
+                      ]),
+                      // put name here
+                      if (valid)
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text("Your identity is",
+                              style: TextStyle(fontSize: 18)),
+                        ),
+                      if (valid)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SelectableText(mnemonic,
+                              style: const TextStyle(
+                                  color: CupertinoColors.activeGreen)),
+                        ),
+                      if (valid)
+                        const Padding(
+                            padding: EdgeInsets.all(8.0), child: Text(advice)),
+                      if (valid)
+                        CupertinoButton(
+                            onPressed: () {
+                              pr.activate(Identity.create(controller.text));
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("I wrote it down"))
+                    ])))));
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (signup) {
+      return buildSignup(context);
+    }
     final im = Provider.of<IdentityManager>(context);
     final data = secureString(16);
     return CupertinoPageScaffold(
@@ -88,7 +168,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () async {
                           // dgf.isLogin = true;
                           // context.url = "/0";
-                          await showModal(context, SignupScreen());
+                          setState(() {
+                            signup = true;
+                          });
                         },
                       ),
                       Qr(data: data),
@@ -120,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (bip39.validateMnemonic(s)) {
                               // widget.dgf.isLogin =rue;
                               // context.url = "/0?";
-                              im.activate(Identity.create());
+                              im.activate(Identity.create("untitled"));
                             } else {
                               print("nope $s");
                             }
@@ -168,14 +250,13 @@ class AddAccount extends StatelessWidget {
           onPressed: () async {
             // dgf.isLogin = true;
             // context.url = "/0";
-            await showModal(context, SignupScreen());
           },
         ),
       ],
     );
   }
 }
-
+/*
 class ShowQr extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -214,7 +295,7 @@ class ShowQr extends StatelessWidget {
   }
 }
 
-/*
+
 
 
 class SliverQr extends StatelessWidget {
@@ -252,7 +333,7 @@ class Linkup extends StatelessWidget {
     throw UnimplementedError();
   }
 }
-
+/*
 class SignupScreen extends StatefulWidget {
   var mnemonic = bip39.generateMnemonic();
   @override
@@ -276,6 +357,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pr = Provider.of<IdentityManager>(context);
     return ModalScaffold(
         //action: const Text("I wrote it down"),
         title: const Text("Create Account"),
@@ -319,9 +401,11 @@ class _SignupScreenState extends State<SignupScreen> {
                       if (valid)
                         CupertinoButton(
                             onPressed: () {
+                              pr.activate(Identity.create());
                               Navigator.of(context).pop();
                             },
                             child: const Text("I wrote it down"))
                     ])))));
   }
 }
+*/

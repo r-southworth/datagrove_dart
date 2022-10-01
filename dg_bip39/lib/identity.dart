@@ -5,23 +5,27 @@ final _storage = const FlutterSecureStorage();
 class Identity {
   String name = "";
   PrivateKey key;
-  Identity(this.key, {this.name = ""});
+  Identity(this.key, this.name);
 
   String get uniqueKey => key.publicKey.toHex();
 
-  static Identity create() {
+  static Identity create(String name) {
     var ec = getP256();
-    return Identity(ec.generatePrivateKey());
+    return Identity(ec.generatePrivateKey(), name);
   }
 
   static Identity fromEntry(MapEntry s) {
     final m = json.decode(s.value) as Map<String, String>;
     return Identity(PrivateKey.fromHex(getP256(), m["private"] ?? ""),
-        name: m["name"] ?? "");
+        m["name"] ?? "untitled");
   }
 
+  @override
   String toString() {
-    return json.encode({name: name, key: key.toHex()});
+    String k = uniqueKey;
+    String v = key.toHex();
+    var obj = {"name": k, "key": v};
+    return json.encode(obj);
   }
 
   MapEntry toEntry() {
@@ -51,10 +55,6 @@ class IdentityManager with ChangeNotifier {
     return value;
   }
 
-  Future<void> store(String key, String value) async {
-    await _storage.write(key: key, value: value, aOptions: _getAndroidOptions);
-  }
-
   Future<void> deleteSecureData(String key) async {}
 
   // erase all identities
@@ -74,6 +74,12 @@ class IdentityManager with ChangeNotifier {
   }
 
   activate(Identity id) async {
+    Future<void> store(String key, String value) async {
+      await _storage.write(
+          key: key, value: value, aOptions: _getAndroidOptions);
+    }
+
+    identity[id.uniqueKey] = id;
     store("active", id.uniqueKey);
     store(id.uniqueKey, id.toString());
     notifyListeners();
