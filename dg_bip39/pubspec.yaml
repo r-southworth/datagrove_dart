@@ -17,7 +17,6 @@ dependencies:
   barcode_widget: ^2.0.3
   ecdsa: ^0.0.4
   convert:
-  eliptic:
 
 dev_dependencies:
   flutter_test:

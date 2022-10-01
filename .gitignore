@@ -10,3 +10,4 @@ build/
 pubspec.lock
 MLKitBarcodeScanning
 .DS_store
+.DS_Store
