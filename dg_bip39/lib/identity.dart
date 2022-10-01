@@ -1,4 +1,20 @@
-part of 'dg_bip39.dart';
+import 'dart:collection';
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:dg_modal/dg_modal.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:bip39/bip39.dart' as bip39;
+import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
+import 'package:barcode_widget/barcode_widget.dart';
+import 'package:convert/convert.dart';
+import 'package:ecdsa/ecdsa.dart';
+import 'package:elliptic/elliptic.dart';
+import 'login.dart';
+import 'identity.dart';
 
 const _storage = FlutterSecureStorage();
 
@@ -38,8 +54,6 @@ class Identity {
 
 class User with ChangeNotifier {
   static User value = User();
-
-  String name = "";
   final identity = <String, Identity>{};
   Identity? active; //  = Identity.create("jim");
   static bool store = false;
