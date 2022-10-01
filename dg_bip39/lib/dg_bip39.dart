@@ -2,6 +2,7 @@
 
 library dg_bip39;
 
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
@@ -18,73 +19,85 @@ import 'package:ecdsa/ecdsa.dart';
 import 'package:elliptic/elliptic.dart';
 part 'identity.dart';
 
-// making signup a modal allows it to be called from anywhere, e.g. a settings page.
+// class User with ChangeNotifier {
+//   bool login = false;
+//   bool signup = false;
+//   String name = "jim";
+//   int age = 10;
+
+//   loginx() {
+//     login = true;
+//     notifyListeners();
+//   }
+
+//   signupx() {
+//     signup = true;
+//     notifyListeners();
+//   }
+// }
+
 showAddIdentity(BuildContext context) async {
-  await showModal(context, LoginScreen());
+  await showModal(context, LoginPage());
 }
+
+// awkward if we change the identity, won't that remove the stack and start over?
+showCreateIdentity(BuildContext context) async {
+  // d
+  await showModal(context, SignupPage());
+}
+
+class Login extends StatelessWidget {
+  final Widget child;
+  const Login({required this.child, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final a = Provider.of<User>(context);
+    if (a.active != null) {
+      return child;
+    } else
+      return LoginPage();
+  }
+}
+
+/*
+ CupertinoPageScaffold(
+          child: Center(
+              child: CupertinoButton(
+                  child: Text("signup"),
+                  onPressed: () {
+                    Provider.of<User>(context, listen: false).loginx();
+                  })));
+    return CupertinoPageScaffold(
+        child: Center(
+            child: CupertinoButton(
+                child: Text("login"),
+                onPressed: () {
+                  Provider.of<User>(context, listen: false).signupx();
+                })));
+*/
+
+// making signup a modal allows it to be called from anywhere, e.g. a settings page.
 
 // move to localization
 const String advice =
     """With this secret identity you can recover your data even if you lose your device. We suggest you write it down with pencil on paper.\n\nNO ONE at Datagrove can retrieve a lost passphrase for you!!""";
 
-class Login extends StatelessWidget {
-  Widget child;
-  String appname;
-  Login({required this.child, super.key, this.appname = "this app"});
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (_) => IdentityManager.value, child: LoginMaybe(child: child));
-  }
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class LoginMaybe extends StatefulWidget {
-  Widget child;
-  LoginMaybe({required this.child, super.key});
-
-  @override
-  State<LoginMaybe> createState() => _LoginMaybeState();
-}
-
-class _LoginMaybeState extends State<LoginMaybe> {
-  @override
-  Widget build(BuildContext context) {
-    //return widget.child;
-    final dg = Provider.of<IdentityManager>(context);
-    if (dg.active != null) {
-      return widget.child;
-    } else if (dg.identity.isEmpty) {
-      return LoginScreen();
-    } else {
-      return Text("not implemented");
-    }
-  }
-}
-
-// we should have a clear option for new users.
-
-class LoginScreen extends StatefulWidget {
-  LoginScreen();
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupPageState extends State<SignupPage> {
+  var mnemonic = bip39.generateMnemonic();
+  late TextEditingController controller;
+  final data = secureString(16);
+  bool valid = false;
   bool obscure = true;
   bool store = true;
   bool signup = false;
-  late TextEditingController controller;
-  @override
-  void initState() {
-    super.initState();
-    controller = TextEditingController();
-  }
-
-  var mnemonic = bip39.generateMnemonic();
-
-  bool valid = false;
 
   checkName() {
     setState(() {
@@ -92,8 +105,9 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Widget buildSignup(BuildContext context) {
-    final pr = Provider.of<IdentityManager>(context);
+  @override
+  Widget build(BuildContext context) {
+    final dg = Provider.of<User>(context);
     return ModalScaffold(
         //action: const Text("I wrote it down"),
         title: const Text("Create Account"),
@@ -110,6 +124,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: CupertinoTextFormFieldRow(
                                 controller: controller,
                                 prefix: const Text("Name"),
+                                onFieldSubmitted: (String s) {
+                                  checkName();
+                                },
                                 autofocus: true,
                                 placeholder: "Screen name")),
                         CupertinoButton(
@@ -138,20 +155,38 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (valid)
                         CupertinoButton(
                             onPressed: () {
-                              pr.activate(Identity.create(controller.text));
-                              Navigator.of(context).pop();
+                              Provider.of<User>(context)
+                                  .activate(Identity.create(controller.text));
                             },
                             child: const Text("I wrote it down"))
                     ])))));
   }
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  var mnemonic = bip39.generateMnemonic();
+  late TextEditingController controller;
+  final data = secureString(16);
+  bool valid = false;
+  bool obscure = true;
+  bool store = true;
+  bool signup = false;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (signup) {
-      return buildSignup(context);
-    }
-    final im = Provider.of<IdentityManager>(context);
-    final data = secureString(16);
     return CupertinoPageScaffold(
         backgroundColor: CupertinoColors.extraLightBackgroundGray,
         navigationBar: CupertinoNavigationBar(middle: Text("Login")),
@@ -202,7 +237,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (bip39.validateMnemonic(s)) {
                               // widget.dgf.isLogin =rue;
                               // context.url = "/0?";
-                              im.activate(Identity.create("untitled"));
+                              Provider.of<User>(context, listen: false)
+                                  .activate(Identity.create("untitled"));
                             } else {
                               print("nope $s");
                             }
@@ -238,7 +274,7 @@ class Qr extends StatelessWidget {
     );
   }
 }
-
+/*
 class AddAccount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -256,7 +292,7 @@ class AddAccount extends StatelessWidget {
     );
   }
 }
-/*
+
 class ShowQr extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

@@ -2,10 +2,34 @@ import 'package:flutter/cupertino.dart';
 import 'package:dg_bip39/dg_bip39.dart';
 import 'package:provider/provider.dart';
 
+void main() {
+  runApp(MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => User())],
+      child: CupertinoApp(home: Login(child: MyApp()))));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final a = Provider.of<User>(context);
+    return CupertinoPageScaffold(
+      child: Center(
+        child: Text("Hi ${a.name}!",
+            style: TextStyle(color: CupertinoColors.white)),
+      ),
+    );
+  }
+}
+
+/*
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await IdentityManager.open();
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider<IdentityManager>(create: (_) => IdentityManager()),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -14,15 +38,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final Brightness platformBrightness =
-        WidgetsBinding.instance.window.platformBrightness;
     return CupertinoApp(
         title: 'Bip39 Login Demo',
-        theme: CupertinoThemeData(
-          brightness: platformBrightness,
-        ),
+        theme: CupertinoThemeData(),
         home: Login(
-          child: MyHomePage(title: 'Bip39 Login Demo'),
+          builder: (BuildContext context) =>
+              MyHomePage(title: 'Bip39 Login Demo'),
         ));
   }
 }
@@ -49,10 +70,18 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text("logged in as ${pr.name}"),
+            CupertinoButton(
+              child: Text("Add identity"),
+              onPressed: () async {
+                await showAddIdentity(context);
+              },
+            ),
+            Text("logged in as ${pr.name}",
+                style: TextStyle(color: CupertinoColors.systemRed)),
           ],
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
+*/

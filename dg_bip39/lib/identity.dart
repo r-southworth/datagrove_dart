@@ -1,6 +1,6 @@
 part of 'dg_bip39.dart';
 
-final _storage = const FlutterSecureStorage();
+const _storage = FlutterSecureStorage();
 
 class Identity {
   String name = "";
@@ -36,22 +36,29 @@ class Identity {
   }
 }
 
-class IdentityManager with ChangeNotifier {
-  static IdentityManager value = IdentityManager();
+class User with ChangeNotifier {
+  static User value = User();
 
   String name = "";
   final identity = <String, Identity>{};
-  Identity? active;
+  Identity? active; //  = Identity.create("jim");
+  static bool store = false;
 
   // on web potentially reload on local storage event?
-  static Future<IdentityManager> open() async {
-    Map<String, String> m =
-        await _storage.readAll(aOptions: _getAndroidOptions);
-    for (var e in m.entries) {
-      if (e.key.length > 8) {
-        value.identity[e.key] = Identity.fromEntry(e);
+  static Future<User> open() async {
+    if (store) {
+      try {
+        Map<String, String> m = await _storage.readAll(webOptions: _webOptions);
+        for (var e in m.entries) {
+          if (e.key.length > 8) {
+            value.identity[e.key] = Identity.fromEntry(e);
+          }
+        }
+      } catch (e) {
+        print(e);
       }
     }
+
     return value;
   }
 
@@ -59,7 +66,9 @@ class IdentityManager with ChangeNotifier {
 
   // erase all identities
   removeAll() async {
-    await _storage.deleteAll(aOptions: _getAndroidOptions);
+    if (store) {
+      await _storage.deleteAll(aOptions: _getAndroidOptions);
+    }
     identity.clear();
     notifyListeners();
   }
@@ -69,19 +78,24 @@ class IdentityManager with ChangeNotifier {
       active = null;
     }
     identity.remove(i);
-    await _storage.delete(key: i, aOptions: _getAndroidOptions);
+    if (store) {
+      await _storage.delete(key: i, aOptions: _getAndroidOptions);
+    }
     notifyListeners();
   }
 
   activate(Identity id) async {
-    Future<void> store(String key, String value) async {
+    Future<void> write(String key, String value) async {
       await _storage.write(
           key: key, value: value, aOptions: _getAndroidOptions);
     }
 
     identity[id.uniqueKey] = id;
-    store("active", id.uniqueKey);
-    store(id.uniqueKey, id.toString());
+    active = id;
+    if (store) {
+      write("active", id.uniqueKey);
+      write(id.uniqueKey, id.toString());
+    }
     notifyListeners();
   }
 }
@@ -98,3 +112,5 @@ String secureString(int size) {
 AndroidOptions _getAndroidOptions = const AndroidOptions(
   encryptedSharedPreferences: true,
 );
+
+WebOptions _webOptions = const WebOptions();

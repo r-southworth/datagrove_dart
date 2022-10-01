@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "watch": "esbuild --bundle src/test.ts --sourcemap --outfile=/Users/jim/dev/experiments/prosemirror_flutter/example/web/edit/out.js --loader:.woff=dataurl --loader:.woff2=dataurl  --loader:.ttf=dataurl --watch"
+    "watch": "esbuild --bundle src/test.ts --sourcemap --outfile=../dg_prosemirror/assets/edit/out.js --loader:.woff=dataurl --loader:.woff2=dataurl  --loader:.ttf=dataurl --watch"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.3.0",
