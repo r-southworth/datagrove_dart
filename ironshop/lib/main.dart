@@ -17,12 +17,6 @@ class LoginStore {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //registerWeb();
-  // at this point we know if we had already established a link
-  // final fl = await Dgf.open(
-  //     dnsName: 'edit.datagrove.com',
-  //     style: DgfStyle(
-  //       brandName: 'Datagrove Issues',
-  //     ));
 
   final st = Store();
   runApp(MultiProvider(
@@ -42,6 +36,8 @@ class MainView extends StatefulWidget {
   State<MainView> createState() => _MainViewState();
 }
 
+// 1. Creat
+
 // we need a login state
 // we need a
 class _MainViewState extends State<MainView> {
@@ -51,7 +47,15 @@ class _MainViewState extends State<MainView> {
     // login is fine offline; we just need a bip39 from secure storate
     // we log out, we want to log out all the tabs, but not really an option right now.
 
-    return CupertinoPageScaffold(child: Text(widget.url));
+    return CustomScrollView(slivers: [
+      CupertinoSliverNavigationBar(
+        largeTitle: Text("Ironshop"),
+      ),
+      SliverToBoxAdapter(
+          child: Column(children: [
+        // list the identities that we have access too.
+      ]))
+    ]);
   }
 }
 
