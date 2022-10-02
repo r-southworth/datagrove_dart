@@ -48,7 +48,7 @@ class User with ChangeNotifier {
   static User value = User();
   final identity = <String, Identity>{};
   Identity? active; //  = Identity.create("jim");
-  static bool store = false;
+  static bool store = true;
 
   // on web potentially reload on local storage event?
   static Future<User> open() async {

@@ -1,22 +1,30 @@
 import 'package:flutter/cupertino.dart';
 import 'package:dg_bip39/dg_bip39.dart';
 import 'package:provider/provider.dart';
+import 'package:url_router/url_router.dart';
 
-void main() {
+void main() async {
+  await User.open();
+  late final router = UrlRouter(
+      onGeneratePages: (router) => [
+            CupertinoPage(child: Login(child: MyApp(router.url))),
+          ]);
   runApp(MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => User())],
-      child: CupertinoApp(home: Login(child: MyApp()))));
+      providers: [ChangeNotifierProvider(create: (_) => User.value)],
+      child: CupertinoApp.router(
+          routeInformationParser: UrlRouteParser(), routerDelegate: router)));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String url;
+  const MyApp(this.url, {super.key});
 
   @override
   Widget build(BuildContext context) {
     final a = Provider.of<User>(context);
     return CupertinoPageScaffold(
       child: Center(
-        child: Text("Hi ${a.active!.name}!",
+        child: Text("Hi ${a.active?.name ?? ""}! ${url} ",
             style: TextStyle(color: CupertinoColors.white)),
       ),
     );
