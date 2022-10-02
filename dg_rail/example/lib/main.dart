@@ -31,7 +31,7 @@ class MainView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DgRail(
-        tool: <Widget>[
+        leading: <Widget>[
           CupertinoButton(
             child: const Text("1"),
             onPressed: () {

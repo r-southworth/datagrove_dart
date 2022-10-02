@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_router/url_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:dg_bip39/dg_bip39.dart';
@@ -20,21 +20,47 @@ void main() async {
   //registerWeb();
   await User.open();
   final st = Store();
-  runApp(MultiProvider(
-      providers: [
-        Provider<Store>(create: (_) => st),
-        ChangeNotifierProvider(create: (_) => User.value)
-      ],
-      child: DgApp(
-          router: UrlRouter(
-              onGeneratePages: (router) => [
-                    CupertinoPage(child: Login(child: MainView(router.url))),
-                  ]))));
+  runApp(const ProviderScope(child: DgApp()));
+}
+
+class DgApp extends StatelessWidget {
+  const DgApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    router:
+    final Brightness platformBrightness =
+        WidgetsBinding.instance.window.platformBrightness;
+    return Theme(
+        data: ThemeData(
+          brightness: platformBrightness,
+        ),
+        child: Material(
+            child: MediaQuery.fromWindow(
+                child: CupertinoApp.router(
+          useInheritedMediaQuery: true,
+          theme: const CupertinoThemeData(brightness: Brightness.dark),
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', 'US'),
+            Locale('es', ''),
+            Locale('fr', 'CA'),
+          ],
+          routerDelegate: router,
+          routeInformationParser: UrlRouteParser(),
+          title: "Datagrove",
+          debugShowCheckedModeBanner: false,
+        ))));
+  }
 }
 
 class MainView extends StatefulWidget {
-  String url;
-  MainView(this.url, {super.key});
+  final String url;
+  const MainView(this.url, {super.key});
 
   @override
   State<MainView> createState() => _MainViewState();
@@ -44,19 +70,19 @@ class _MainViewState extends State<MainView> {
   @override
   Widget build(BuildContext context) {
     return DgRail(
-        tool: [
+        leading: [
           CupertinoButton(
-              child: Icon(CupertinoIcons.folder),
+              child: const Icon(CupertinoIcons.folder),
               onPressed: () {
                 context.url = "/folder";
               }),
           CupertinoButton(
-              child: Icon(CupertinoIcons.search),
+              child: const Icon(CupertinoIcons.search),
               onPressed: () {
                 context.url = "/search";
               }),
           CupertinoButton(
-              child: Icon(CupertinoIcons.gear),
+              child: const Icon(CupertinoIcons.gear),
               onPressed: () {
                 context.url = "/settings";
               }),
@@ -80,46 +106,7 @@ class _MainViewState extends State<MainView> {
   }
 }
 
-class DgApp extends StatelessWidget {
-  UrlRouter router;
-  DgApp({required this.router});
-  @override
-  Widget build(BuildContext context) {
-    final Brightness platformBrightness =
-        WidgetsBinding.instance.window.platformBrightness;
-    return Theme(
-        data: ThemeData(
-          brightness: platformBrightness,
-        ),
-        child: Material(
-            child: MediaQuery.fromWindow(
-                child: CupertinoApp.router(
-          useInheritedMediaQuery: true,
-          theme: const CupertinoThemeData(brightness: Brightness.dark),
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en', 'US'),
-            Locale('es', ''),
-            Locale('fr', 'CA'),
-          ],
-          routerDelegate: router,
-          //     RoutemasterDelegate(routesBuilder: (context) => routes),
-          routeInformationParser: UrlRouteParser(),
-
-          title: "Datagrove",
-          debugShowCheckedModeBanner: false,
-        ))));
-  }
-}
-//https://github.com/flutter/flutter/issues/48438
-
-// return MediaQuery.fromWindow(
-//   child: CupertinoApp(
-//     useInheritedMediaQuery: true,
-//     home: // ...
-//   )
-// );
+final router = UrlRouter(
+    onGeneratePages: (router) => [
+          CupertinoPage(child: Login(child: MainView(router.url))),
+        ]);

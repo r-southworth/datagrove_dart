@@ -45,6 +45,8 @@ dependencies:
     path: "../dg_rail"
   dg_prosemirror:
     path: "../dg_prosemirror"
+  riverpod: ^2.0.1
+  flutter_riverpod: ^2.0.1
 
 dev_dependencies:
   flutter_test:
