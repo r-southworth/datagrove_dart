@@ -58,7 +58,7 @@ export default class CodeFence extends Node {
         const select = document.createElement("select");
         select.addEventListener("change", this.handleLanguageChange);
 
-        ["katex","mermaid","graphjs","vega-lite"].forEach(([key, label]) => {
+        ["katex","mermaid","graphjs","vega-lite","maplibre"].forEach(([key, label]) => {
           const option = document.createElement("option");
           const value = key === "none" ? "" : key;
           option.value = value;

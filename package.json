@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "frappe-charts": "^1.6.2",
+    "json5": "^2.2.1",
+    "maplibre-gl": "^2.4.0",
     "yaml": "^2.1.1"
   }
 }

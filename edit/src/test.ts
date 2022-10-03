@@ -8,11 +8,20 @@ import { mountEditor } from './api'
 
 
 let v = `
-# one !
+# one !!
 
 ## two 
 
 ### three
+\`\`\`maplibre
+{
+  interactive: false,
+  style: 'https://demotiles.maplibre.org/style.json', // style URL
+  center: [-40, 0], // starting position [lng, lat]
+  zoom: 1 // starting zoom
+}
+\`\`\`
+
 
 \`\`\`katex
   x^2

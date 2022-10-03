@@ -16,10 +16,11 @@ import {
   InfoIcon,
   LinkIcon,
   MathIcon,
+  
 
  
 } from "../icons";
-import { ChartBarSquareIcon, PresentationChartBarIcon } from '@heroicons/react/24/solid'
+import { MapIcon, ChartBarSquareIcon, PresentationChartBarIcon } from '@heroicons/react/24/solid'
 import { MenuItem } from "../types";
 import baseDictionary from "../dictionary";
 
@@ -180,6 +181,14 @@ export default function blockMenuItems(
     attrs: {
       language: 'vega-lite'
     },
+   },{name: "code_block",
+   title: 'MapLibre',
+   icon: MapIcon,
+   keywords: "code_block map ",
+   shortcut: "^ ⇧ w",
+   attrs: {
+     language: 'maplibre'
    },
+  },
   ];
 }

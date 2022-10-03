@@ -1,0 +1,57 @@
+
+// allow authorization using combination of authorized phone number, authorized email, secret, time limit
+// the allowed combinations are stored in the auth table
+
+// once a user authorizes an identity, the identity is kept in the identity table together with the eligibility id. 
+syntax = "proto3";
+
+message TryAuth {
+     int64 tag = 1;
+     bytes identity = 2;
+     string email = 3;
+     string phone = 4;
+     bytes secret = 5;
+     bytes challengeReply = 6;
+}
+message AuthResponse {
+     int64 tag = 1;
+     int64 error = 2;
+     bytes secret = 3; 
+}
+message TryQuery {
+     int64 tag = 1;
+     int64 sequence_number = 2;
+     bytes hmac = 3;
+     bytes query = 4;
+}
+message RequestChallenge {
+     int64 tag = 1;
+}
+message Challenge {
+
+}
+
+message Reply {
+     int64 tag = 1;
+     int64 error = 2;
+     bytes message = 3;
+}
+
+message PriceReply {
+    Reply reply = 1;
+
+}
+
+message Request {
+   oneof service {
+       TryAuth tryAuth = 1;
+       
+       //Price price = 2;
+   }
+}
+
+message Response {
+   oneof reply {
+       PriceReply priceReply = 3;
+   }
+}

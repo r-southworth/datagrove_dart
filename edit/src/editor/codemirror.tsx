@@ -28,6 +28,9 @@ import katex from 'katex'
 import vegaEmbed from 'vega-embed'
 import yaml from 'yaml'
 import {Chart} from 'frappe-charts'
+import {Map} from 'maplibre-gl'
+import { v4 as uuidv4 } from 'uuid';
+import JSON5 from 'json5'
 
   export class CodeBlockView { 
     cm: CmEditorView
@@ -91,13 +94,24 @@ import {Chart} from 'frappe-charts'
       this.dom.className = "cm-wrapper"
 
       var show = document.createElement("div")
+      show.id = uuidv4()
       show.classList.add("cm-show") 
-      
+      this.dom.appendChild(show)
 
       var vjs : string
       const render = ()=>{
         const v = this.cm.state.doc.toString()
         switch(lang) {
+            case 'maplibre':
+              try {
+                var js = JSON5.parse(v);
+                js.container = show
+                new Map(js)
+              } catch(e){
+                console.log("map error", e)
+              }
+
+              break
             case 'katex':
                 katex.render(v, show)
                 break;
@@ -121,26 +135,6 @@ import {Chart} from 'frappe-charts'
       caption.innerText = lang
       this.dom.appendChild(caption)
       this.dom.appendChild(this.cm.dom)
-      /*
-      I'm not sure I see the advantage of this approach; why would you change?
-         select: HTMLSelectElement
-      this.select = document.createElement("select");
-      this.select.addEventListener("change", this.handleLanguageChange);
-      this.select.style.color = 'black';    
-      ["katex","mermaid","graphjs","vega-lite"].forEach((label) => {
-        const option = document.createElement("option");
-        option.value = label;
-        option.innerText = label;
-        option.selected = node.attrs.language === label;
-        this.select.appendChild(option);
-      });  
-      this.dom.appendChild(this.select)
-         this.select.value
-             handleLanguageChange(ev: Event){
-     
-
-    }
-      */
   
       // This flag is used to avoid an update loop between the outer and
       // inner editor
