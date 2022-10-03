@@ -13,37 +13,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // we wait in
 
 void main() async {
-  // this is going to need to open the database component
-  // so we'll have to make sure we only call once with many components.
-  //final register = await DgTool.open();
-  //register.add(MyToolPackage());
-
-  runApp(ProviderScope(child: Splash()));
+  initializeTools(await initialTools());
+  runApp(ProviderScope(child: MyApp()));
 }
-
-class Splash extends ConsumerWidget {
-  Widget build(BuildContext context, WidgetRef ref) {
-    AsyncValue<Configuration> config = ref.watch(configProvider);
-
-    return config.when(
-      loading: () => const CupertinoActivityIndicator(),
-      error: (err, stack) => Text('Error: $err'),
-      data: (config) {
-        return MyApp();
-      },
-    );
-  }
-}
-
-class Configuration {}
-
-final configProvider = FutureProvider<Configuration>((ref) async {
-  // final content = json.decode(
-  //   await rootBundle.loadString('assets/configurations.json'),
-  // ) as Map<String, Object?>;
-
-  return Configuration();
-});
 
 class MyApp extends StatelessWidget {
   late final router = UrlRouter(
@@ -69,6 +41,69 @@ class MainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DgTool();
+    return DgTool(child: red("Document here"));
   }
 }
+
+final red = (String s) =>
+    Text(s, style: const TextStyle(color: CupertinoColors.systemRed));
+
+Future<ToolSet> initialTools() async {
+  return ToolSet(
+    tool: [
+      Tool(
+        id: "search",
+        icon: const Icon(CupertinoIcons.search),
+        buildModal: (_) {
+          return BottomModal(child: red("This is a search pane"));
+        },
+        builder: (_) {
+          return red("This is a search pane");
+        },
+      )
+    ],
+    active: 0,
+    bottomCount: 1,
+  );
+}
+
+/*
+class TestDoc {
+  late List<String> title;
+  TestDoc() {
+    title = [for (var i = 0; i < 100; i++) "$i"];
+  }
+}
+
+typedef TestDocController = ValueNotifier<TestDoc>;
+
+//
+class TestDocView extends StatefulWidget {
+  TestDocController controller;
+  TestDocView(this.controller);
+
+  @override
+  State<TestDocView> createState() => _TestDocViewState();
+}
+
+class _TestDocViewState extends State<TestDocView> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(() {
+      //
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(slivers: [
+      SliverList(
+          delegate: SliverChildListDelegate([
+        for (var o in widget.controller.value.title)
+          CupertinoListTile(title: Text(o))
+      ]))
+    ]);
+  }
+}
+*/

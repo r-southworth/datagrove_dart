@@ -41,8 +41,8 @@ dependencies:
     sdk: flutter
   dg_bip39:
     path: "../dg_bip39"
-  dg_rail:
-    path: "../dg_rail"
+  dg_tool:
+    path: "../dg_tool"
   dg_prosemirror:
     path: "../dg_prosemirror"
   riverpod: ^2.0.1

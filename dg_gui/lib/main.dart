@@ -4,9 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_router/url_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:dg_bip39/dg_bip39.dart';
-import 'package:dg_rail/dg_rail.dart';
+import 'package:dg_tool/dg_tool.dart';
 
-class Dgf {}
+// initializing riverpod is not great.
+// https://stackoverflow.com/questions/65968725/
+// https://github.com/rrousselGit/riverpod/issues/57
+
+// the deep link for the entire system is to open a document and optionally configure some tools. Such a deep link will be the only document open on the page
+// the user should first establish their identity, otherwise they won't be
+final router = UrlRouter(
+    onGeneratePages: (router) => [
+          CupertinoPage(child: Login(child: MainView(router.url))),
+        ]);
 
 class Store {}
 
@@ -58,6 +67,26 @@ class DgApp extends StatelessWidget {
   }
 }
 
+class SearchPane extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
+  }
+
+  static Widget modal(BuildContext c) {
+    return SearchPane();
+  }
+}
+
+class BrowsePane extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
+  }
+}
+
 class MainView extends StatefulWidget {
   final String url;
   const MainView(this.url, {super.key});
@@ -66,10 +95,30 @@ class MainView extends StatefulWidget {
   State<MainView> createState() => _MainViewState();
 }
 
+Future<ToolSet> initialTools() async {
+  return ToolSet(
+    tool: [
+      Tool(
+        id: "search",
+        icon: const Icon(CupertinoIcons.search),
+        buildModal: (c) {
+          return BottomModal(child: SearchPane.modal(c));
+        },
+        builder: (c) {
+          return SearchPane();
+        },
+      )
+    ],
+    active: 0,
+    bottomCount: 1,
+  );
+}
+
 class _MainViewState extends State<MainView> {
   @override
   Widget build(BuildContext context) {
-    return DgRail(
+    return DgTool(
+        child: red("document here")
         leading: [
           CupertinoButton(
               child: const Icon(CupertinoIcons.folder),
@@ -105,8 +154,3 @@ class _MainViewState extends State<MainView> {
         ]));
   }
 }
-
-final router = UrlRouter(
-    onGeneratePages: (router) => [
-          CupertinoPage(child: Login(child: MainView(router.url))),
-        ]);
