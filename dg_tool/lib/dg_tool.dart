@@ -6,7 +6,7 @@ import 'provider.dart';
 export 'provider.dart';
 import 'view_grid.dart';
 import 'package:split_view/split_view.dart';
-
+//import 'package:multi_split_view/multi_split_view.dart';
 // user configurable rail with data model
 // rail has 3 sections: start, dynamic, end
 // dynamic will be tools that show for some context.
@@ -25,8 +25,15 @@ class DgTool extends StatefulWidget {
   State<DgTool> createState() => _DgToolState();
 }
 
+// in mobile mode, all buttons become menu buttons
 class _DgToolState extends State<DgTool> {
-  bool tool = false;
+  int activeTool = -1;
+  final ctl = SplitViewController();
+  @override
+  void initState() {
+    super.initState();
+    ctl.weights = [0.3, 0.7];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,20 +42,32 @@ class _DgToolState extends State<DgTool> {
         ? Container(
             color: CupertinoColors.black,
             child: Row(children: [
-              RailColumn(),
-
-              ViewGrid()
-              // SplitView(
-              //     viewMode: SplitViewMode.Horizontal,
-              //     children: [ToolPane(), ViewGrid()])
-            ]),
-          )
+              RailColumn(
+                  value: activeTool,
+                  onChanged: (int x) {
+                    setState(() {
+                      activeTool = x;
+                    });
+                  }),
+              Expanded(
+                  child: //SplitView(children: [ToolPane(), ViewGrid()])
+                      activeTool == -1
+                          ? ViewGrid()
+                          : SplitView(
+                              gripColor:
+                                  CupertinoTheme.of(context).barBackgroundColor,
+                              viewMode: SplitViewMode.Horizontal,
+                              controller: ctl,
+                              indicator: SplitIndicator(
+                                  color: CupertinoTheme.of(context)
+                                      .barBackgroundColor,
+                                  viewMode: SplitViewMode.Horizontal,
+                                  isActive: true),
+                              children: [ToolPane(), ViewGrid()]))
+            ]))
         : Container(
             color: CupertinoColors.black,
-            child: Column(children: [
-              Expanded(child: tool ? ToolPane() : ViewGrid()),
-              RailRow()
-            ]));
+            child: Column(children: [Expanded(child: ViewGrid()), RailRow()]));
   }
 }
 
@@ -85,7 +104,9 @@ class RailRow extends ConsumerWidget {
 }
 
 class RailColumn extends ConsumerWidget {
-  const RailColumn({super.key});
+  final int value;
+  final Function(int) onChanged;
+  const RailColumn({required this.value, required this.onChanged, super.key});
 
   @override
   Widget build(context, ref) {

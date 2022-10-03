@@ -29,7 +29,10 @@ class MenuButton extends StatelessWidget {
 // builder instead of child? that would be a way to get the context to the tool.
 class Tool {
   String id;
+  // for building the toolpane
   Widget Function(BuildContext, bool selected) builder;
+
+  Function(BuildContext context)? pane;
   Tool({
     required this.id,
     required this.builder,

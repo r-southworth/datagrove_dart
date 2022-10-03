@@ -16,6 +16,7 @@ dependencies:
   flutter_riverpod: ^2.0.1
   split_view: ^3.2.1
   fluent_ui: ^4.0.1
+  multi_split_view: ^2.1.0
 
 dev_dependencies:
   flutter_test:
