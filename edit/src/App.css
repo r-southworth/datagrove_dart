@@ -31,7 +31,10 @@ body {
 }
 
 .ProseMirror {
-  margin-left: 32px;
+  margin: auto;
+  margin-top: 75px;
+  margin-bottom: 75px;
+  width: 80%;
 
 }
 
