@@ -335,7 +335,8 @@ export const oneDarkTheme = CmEditorView.theme({
   },
 
   ".cm-content": {
-    caretColor: cursor
+    caretColor: cursor,
+    "aria-label": "test code block"
   },
 
   ".cm-cursor, .cm-dropCursor": {borderLeftColor: cursor},
