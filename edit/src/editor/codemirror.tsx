@@ -1,6 +1,6 @@
 
 import { Extension as CmExtension, EditorState as CmEditorState } from "@codemirror/state";
-import {EditorView as CmEditorView, keymap as cmkeymap, drawSelection} from "@codemirror/view"
+import {EditorView as CmEditorView, keymap as cmkeymap, drawSelection, ViewUpdate, KeyBinding} from "@codemirror/view"
 import { markdown } from "@codemirror/lang-markdown"
 import { javascript } from "@codemirror/lang-javascript";
 import {defaultKeymap} from "@codemirror/commands"// import {
@@ -18,7 +18,7 @@ import {lintKeymap} from "@codemirror/lint"
 
 import {exitCode} from "prosemirror-commands"
 import {undo, redo} from "prosemirror-history"
-import {EditorState, Selection, TextSelection} from "prosemirror-state"
+import {EditorState, Selection, TextSelection,Transaction, Command} from "prosemirror-state"
 import {EditorView} from "prosemirror-view"
 import {DOMParser,Node as ProsemirrorNode} from "prosemirror-model"
 import {keymap} from "prosemirror-keymap"
@@ -144,7 +144,7 @@ import JSON5 from 'json5'
 
   // }
   // nodeview_forwardUpdate{
-    forwardUpdate(update) {
+    forwardUpdate(update: ViewUpdate) {
       if (this.updating || !this.cm.hasFocus) return
       let offset = this.getPos() + 1, {main} = update.state.selection
       let selection = TextSelection.create(this.view.state.doc,
@@ -164,7 +164,7 @@ import JSON5 from 'json5'
     }
   // }
   // nodeview_setSelection{
-    setSelection(anchor, head) {
+    setSelection(anchor: number, head: number) {
       this.cm.focus()
       this.updating = true
       this.cm.dispatch({selection: {anchor, head}})
@@ -172,13 +172,13 @@ import JSON5 from 'json5'
     }
   // }
   // nodeview_keymap{
-    codeMirrorKeymap() {
+    codeMirrorKeymap() : KeyBinding[]{
       let view = this.view
       return [
-        {key: "ArrowUp", run: () => this.maybeEscape("line", -1)},
-        {key: "ArrowLeft", run: () => this.maybeEscape("char", -1)},
-        {key: "ArrowDown", run: () => this.maybeEscape("line", 1)},
-        {key: "ArrowRight", run: () => this.maybeEscape("char", 1)},
+        {key: "ArrowUp", run: () => this.maybeEscapeLine(-1)},
+        {key: "ArrowLeft", run: () => this.maybeEscapeChar(-1)},
+        {key: "ArrowDown", run: () => this.maybeEscapeLine(1)},
+        {key: "ArrowRight", run: () => this.maybeEscapeChar(1)},
         {key: "Ctrl-Enter", run: () => {
           if (!exitCode(view.state, view.dispatch)) return false
           view.focus()
@@ -193,19 +193,30 @@ import JSON5 from 'json5'
       ]
     }
   
-    maybeEscape(unit, dir) {
-      let {state} = this.cm
-      let {main} = state.selection
+    maybeEscapeChar(dir: number):boolean {
+      let state = this.cm.state
+      let main = state.selection.main
       if (!main.empty) return false
-      if (unit == "line") {
-        //main = state.doc.lineAt(main.head)
-      }
       if (dir < 0 ? main.from > 0 : main.to < state.doc.length) return false
       let targetPos = this.getPos() + (dir < 0 ? 0 : this.nodepm.nodeSize)
       let selection = Selection.near(this.view.state.doc.resolve(targetPos), dir)
       let tr = this.view.state.tr.setSelection(selection).scrollIntoView()
       this.view.dispatch(tr)
       this.view.focus()
+      return false
+    }
+    maybeEscapeLine(dir: number):boolean {
+      let state = this.cm.state
+      if (!state.selection.main.empty) return false   
+      let main = state.doc.lineAt(state.selection.main.head)
+
+      if (dir < 0 ? main.from > 0 : main.to < state.doc.length) return false
+      let targetPos = this.getPos() + (dir < 0 ? 0 : this.nodepm.nodeSize)
+      let selection = Selection.near(this.view.state.doc.resolve(targetPos), dir)
+      let tr = this.view.state.tr.setSelection(selection).scrollIntoView()
+      this.view.dispatch(tr)
+      this.view.focus()
+      return false
     }
   // }
   // nodeview_update{
@@ -246,8 +257,8 @@ import JSON5 from 'json5'
   // arrowHandlers{
   
   
-  function arrowHandler(dir) {
-    return (state, dispatch, view) => {
+  function arrowHandler(dir: "up" | "down" | "left" | "right" | "forward" | "backward") {
+    const fn = (state: EditorState, dispatch: (tr: Transaction) => void, view: EditorView) : boolean => {
       if (state.selection.empty && view.endOfTextblock(dir)) {
         let side = dir == "left" || dir == "up" ? -1 : 1
         let $head = state.selection.$head
@@ -260,9 +271,10 @@ import JSON5 from 'json5'
       }
       return false
     }
+    return fn as Command
   }
   
-  const arrowHandlers = keymap({
+  export const arrowHandlers = keymap({
     ArrowLeft: arrowHandler("left"),
     ArrowRight: arrowHandler("right"),
     ArrowUp: arrowHandler("up"),
@@ -336,7 +348,6 @@ export const oneDarkTheme = CmEditorView.theme({
 
   ".cm-content": {
     caretColor: cursor,
-    "aria-label": "test code block"
   },
 
   ".cm-cursor, .cm-dropCursor": {borderLeftColor: cursor},
