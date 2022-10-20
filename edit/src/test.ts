@@ -15,7 +15,7 @@ let v = `
 ### three
 \`\`\`maplibre
 {
-  container: "cm-wrapper",
+  container: "map",
   interactive: false,
   style: 'https://demotiles.maplibre.org/style.json', // style URL
   center: [-40, 0], // starting position [lng, lat]

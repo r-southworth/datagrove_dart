@@ -103,14 +103,22 @@ import JSON5 from 'json5'
         const v = this.cm.state.doc.toString()
         switch(lang) {
             case 'maplibre':
+              var map = document.createElement("div")
+              map.classList.add("map")
+              this.dom.appendChild(map)
               try {
-                var map = document.createElement("div")
-                map.id = uuidv4()
-                map.classList.add("map")
-                this.dom.appendChild(map)
+                var exist = document.getElementsByClassName("map")
                 var js = JSON5.parse(v);
-                js.container = show
-                new Map(js)
+                js.container = map
+                if (exist != null){
+                  mapmap.on('load', function(){
+                    mapmap.remove()
+                    new Map(js)
+                  })
+                } else {
+                  var mapmap = new Map(js)
+                  return mapmap
+                }
               } catch(e){
                 console.log("map error", e)
               }
