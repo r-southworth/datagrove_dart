@@ -15,11 +15,14 @@ let v = `
 ### three
 \`\`\`maplibre
 {
+  container: "cm-wrapper",
   interactive: false,
   style: 'https://demotiles.maplibre.org/style.json', // style URL
   center: [-40, 0], // starting position [lng, lat]
-  zoom: 1 // starting zoom
+  zoom: 1, // starting zoom
+  trackResize: false
 }
+
 \`\`\`
 
 

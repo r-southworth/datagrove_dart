@@ -104,13 +104,16 @@ import JSON5 from 'json5'
         switch(lang) {
             case 'maplibre':
               try {
+                var map = document.createElement("div")
+                map.id = uuidv4()
+                map.classList.add("map")
+                this.dom.appendChild(map)
                 var js = JSON5.parse(v);
                 js.container = show
                 new Map(js)
               } catch(e){
                 console.log("map error", e)
               }
-
               break
             case 'katex':
                 katex.render(v, show)
